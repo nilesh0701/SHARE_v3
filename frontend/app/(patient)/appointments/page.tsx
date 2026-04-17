@@ -1,0 +1,138 @@
+"use client";
+import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { getUser, logout } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Calendar, Video, LogOut, ChevronLeft, Plus } from "lucide-react";
+
+const statusColors: any = {
+  PENDING: "bg-yellow-100 text-yellow-700",
+  CONFIRMED: "bg-green-100 text-green-700",
+  CANCELLED: "bg-red-100 text-red-700",
+  COMPLETED: "bg-gray-100 text-gray-700",
+};
+
+export default function AppointmentsPage() {
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const u = getUser();
+    if (!u) { router.push("/login"); return; }
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const res = await api.get("/appointments/mine");
+      setAppointments(res.data.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancel = async (id: string) => {
+    if (!confirm("Cancel this appointment?")) return;
+    try {
+      await api.put(`/appointments/${id}/cancel`);
+      fetchAppointments();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "Failed to cancel");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-2 text-gray-600 hover:text-indigo-600">
+            <ChevronLeft size={20} /> Dashboard
+          </Link>
+          <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
+            <LogOut size={16} /> Logout
+          </button>
+        </div>
+      </nav>
+
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-gray-800">My Appointments</h2>
+          <button
+            type="button"
+            onClick={() => router.push("/search")}
+            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-600"
+          >
+            <Plus size={16} />
+            New Appointment
+          </button>
+        </div>
+        {loading ? (
+          <div className="text-center py-20 text-gray-400">Loading...</div>
+        ) : appointments.length === 0 ? (
+          <div className="text-center py-20">
+            <Calendar size={48} className="text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-400">No appointments yet.</p>
+            <Link href="/search" className="text-indigo-600 hover:underline mt-2 inline-block">
+              Book your first appointment
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {appointments.map((appt: any) => (
+              <div key={appt.id} className="bg-white rounded-2xl shadow-sm border p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[appt.status]}`}>
+                        {appt.status}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        appt.consultation_type === "VIDEO"
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-orange-100 text-orange-600"
+                      }`}>
+                        {appt.consultation_type === "VIDEO" ? "🎥 Video" : "🏥 In Person"}
+                      </span>
+                    </div>
+                    <p className="text-gray-800 font-medium">
+                      {new Date(appt.scheduled_at).toLocaleString("en-IN", {
+                        dateStyle: "full", timeStyle: "short"
+                      })}
+                    </p>
+                    {appt.notes && (
+                      <p className="text-gray-500 text-sm mt-1">Notes: {appt.notes}</p>
+                    )}
+                    {appt.meeting_link && (
+                      <a href={appt.meeting_link} target="_blank" rel="noreferrer"
+                        className="text-blue-600 hover:underline text-sm mt-2 flex items-center gap-1">
+                        <Video size={14} /> Join Meeting
+                      </a>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-green-600 font-semibold">₹{appt.payment_amount}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
+                      appt.payment_status === "PAID"
+                        ? "bg-green-100 text-green-600"
+                        : "bg-yellow-100 text-yellow-600"
+                    }`}>
+                      {appt.payment_status}
+                    </span>
+                  </div>
+                </div>
+                {appt.status === "PENDING" && (
+                  <button onClick={() => cancel(appt.id)}
+                    className="mt-4 text-red-500 hover:text-red-700 text-sm font-medium">
+                    Cancel Appointment
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
