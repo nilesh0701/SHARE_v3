@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone, timedelta
 from app.config import settings
-from app.models.tables import medical_file, file_permission, appointment, doctor_profile
+from app.models.tables import medical_file, file_permission, appointment, doctor_profile, audit_log
 
 cloudinary.config(
     cloud_name=settings.cloudinary_cloud_name,
@@ -19,7 +19,7 @@ def upload_medical_file(db: Session, *, patient_id: uuid.UUID,
                         file_type: str) -> dict:
     result = cloudinary.uploader.upload(
         file_bytes,
-        folder=f"medshare/patients/{patient_id}",
+        folder=f"share/patients/{patient_id}",
         resource_type="raw",
         public_id=f"{uuid.uuid4()}",
         use_filename=False,
@@ -56,7 +56,7 @@ def share_file(
     patient_id: uuid.UUID,
     doctor_id: uuid.UUID,
     start_date: datetime,
-    end_date: datetime,
+    end_date: datetime | None,
 ) -> dict:
     file_row = db.execute(
         sa.select(medical_file).where(
@@ -70,15 +70,14 @@ def share_file(
 
     now = datetime.now(timezone.utc)
     requested_start_at = start_date.astimezone(timezone.utc)
-    # end_date from client is ignored for security; expiry is tied to appointment end.
-    _ = end_date
+    requested_end_at = end_date.astimezone(timezone.utc) if end_date else None
 
     if requested_start_at <= now:
         start_at = now
     else:
         start_at = requested_start_at
 
-    # Strictly tie access window to the next scheduled appointment end.
+    # Validate relationship: patient can only share with doctors they have an upcoming appointment with.
     appt_row = db.execute(
         sa.select(
             appointment.c.id,
@@ -102,10 +101,16 @@ def share_file(
     if appt_start.tzinfo is None:
         appt_start = appt_start.replace(tzinfo=timezone.utc)
     duration = int(appt_row.duration_minutes or 30)
-    end_at = appt_start + timedelta(minutes=duration)
+    appt_end_at = appt_start + timedelta(minutes=duration)
+
+    # Prioritize explicit expiry time provided by client; fallback to appointment end-time.
+    if requested_end_at is not None:
+        end_at = requested_end_at
+    else:
+        end_at = appt_end_at
 
     if end_at <= start_at:
-        raise ValueError("Appointment already ended or invalid time window")
+        raise ValueError("Invalid time window")
 
     perm_id = uuid.uuid4()
     db.execute(file_permission.insert().values(
@@ -121,7 +126,7 @@ def share_file(
     return {
         "permission_id": str(perm_id),
         "expires_at": end_at.isoformat(),
-        "appointment_end": end_at.isoformat(),
+        "appointment_end": appt_end_at.isoformat(),
     }
 
 
@@ -199,3 +204,62 @@ def delete_file(db: Session, *, file_id: uuid.UUID, patient_id: uuid.UUID) -> No
         .values(deleted_at=sa.func.now())
     )
     db.commit()
+
+
+def extend_permission(
+    db: Session,
+    *,
+    permission_id: uuid.UUID,
+    patient_id: uuid.UUID,
+    extend_by: timedelta,
+) -> dict:
+    """Extend an existing permission expiry without creating a new row."""
+    row = db.execute(
+        sa.select(
+            file_permission.c.id,
+            file_permission.c.patient_id,
+            file_permission.c.file_id,
+            file_permission.c.expires_at,
+            file_permission.c.revoked_at,
+        ).where(file_permission.c.id == permission_id)
+    ).fetchone()
+
+    if not row:
+        raise ValueError("Permission not found")
+    if row.patient_id != patient_id:
+        raise ValueError("Not allowed")
+    if row.revoked_at is not None:
+        raise ValueError("Permission revoked")
+    if extend_by <= timedelta(0):
+        raise ValueError("Invalid extension duration")
+
+    current_exp = row.expires_at
+    if current_exp.tzinfo is None:
+        current_exp = current_exp.replace(tzinfo=timezone.utc)
+    new_exp = current_exp + extend_by
+
+    db.execute(
+        file_permission.update()
+        .where(
+            file_permission.c.id == permission_id,
+            file_permission.c.patient_id == patient_id,
+            file_permission.c.revoked_at.is_(None),
+        )
+        .values(expires_at=new_exp)
+    )
+
+    db.execute(
+        audit_log.insert().values(
+            permission_id=permission_id,
+            doctor_id=patient_id,  # column name is legacy; stores the actor id
+            file_id=row.file_id,
+            outcome="EXTENSION",
+            deny_reason=f"EXTENDED_BY_{int(extend_by.total_seconds())}s",
+        )
+    )
+
+    db.commit()
+    return {
+        "permission_id": str(permission_id),
+        "expires_at": new_exp.isoformat(),
+    }

@@ -49,7 +49,7 @@ async def reg_doctor(
         cert_bytes = await certificate.read()
         upload_result = cloudinary.uploader.upload(
             cert_bytes,
-            folder="medshare/certificates",
+            folder="share/certificates",
             resource_type="image",
             format="png",
         )

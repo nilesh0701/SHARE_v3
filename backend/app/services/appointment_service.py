@@ -1,7 +1,7 @@
 import uuid
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from app.models.tables import appointment, doctor_profile, patient_profile
 
 def book_appointment(db: Session, *, patient_id: uuid.UUID,
@@ -30,7 +30,7 @@ def book_appointment(db: Session, *, patient_id: uuid.UUID,
     meeting_link = None
     if consultation_type == "VIDEO":
         room_id = str(uuid.uuid4()).replace("-", "")[:12]
-        meeting_link = f"https://meet.jit.si/medshare-{room_id}"
+        meeting_link = f"https://meet.jit.si/share-{room_id}"
 
     doctor_row = db.execute(
         sa.select(doctor_profile).where(
@@ -95,4 +95,30 @@ def update_appointment_status(db: Session, *, appointment_id: uuid.UUID,
         .where(appointment.c.id == appointment_id)
         .values(status=new_status)
     )
+    db.commit()
+
+
+def delete_appointment(db: Session, *, appointment_id: uuid.UUID, user_id: uuid.UUID, role: str) -> None:
+    row = db.execute(
+        sa.select(appointment).where(appointment.c.id == appointment_id)
+    ).fetchone()
+    if not row:
+        raise ValueError("Appointment not found")
+
+    if role == "PATIENT" and row.patient_id != user_id:
+        raise ValueError("Not your appointment")
+    if role == "DOCTOR" and row.doctor_id != user_id:
+        raise ValueError("Not your appointment")
+
+    scheduled_at = row.scheduled_at
+    if scheduled_at.tzinfo is None:
+        scheduled_at = scheduled_at.replace(tzinfo=timezone.utc)
+    duration = int(row.duration_minutes or 30)
+    end_at = scheduled_at + timedelta(minutes=duration)
+    now = datetime.now(timezone.utc)
+
+    if now < end_at:
+        raise ValueError("Appointment not finished yet")
+
+    db.execute(appointment.delete().where(appointment.c.id == appointment_id))
     db.commit()

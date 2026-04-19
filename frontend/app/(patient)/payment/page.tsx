@@ -21,7 +21,7 @@ export default function PaymentPage() {
   };
 
   if (success) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
         <div className="text-5xl mb-4">✅</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
@@ -35,7 +35,7 @@ export default function PaymentPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <Link href="/appointments" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 mb-6 text-sm">
           <ChevronLeft size={16} /> Back

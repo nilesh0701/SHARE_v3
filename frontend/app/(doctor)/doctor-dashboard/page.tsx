@@ -1,14 +1,16 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "@/lib/axios";
 import { getStoredToken, getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SecurePDFViewer from "@/components/secure-pdf-viewer";
+import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareNavWordmark } from "@/components/branding/share-brand";
 import {
   Calendar, Clock, Video, Building2, LogOut, CheckCircle,
   XCircle, FileText, X, User, CreditCard,
-  ChevronRight, Banknote, Eye, BellRing,
+  ChevronRight, Banknote, Eye, BellRing, Trash2,
 } from "lucide-react";
 
 /* ── colour helpers ── */
@@ -16,7 +18,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   PENDING:   { bg: "#FEF9C3", color: "#854D0E" },
   CONFIRMED: { bg: "#DCFCE7", color: "#166534" },
   CANCELLED: { bg: "#FEE2E2", color: "#991B1B" },
-  COMPLETED: { bg: "#EEF4FF", color: "#1e40af" },
+  COMPLETED: { bg: "var(--app-surface-2)", color: "var(--app-primary)" },
 };
 
 const PAY_STYLE: Record<string, { bg: string; color: string }> = {
@@ -51,6 +53,14 @@ function AppointmentModal({
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerFileName, setViewerFileName] = useState<string>("Report");
   const [accessExpired, setAccessExpired] = useState(false);
+  const [retryPermissionId, setRetryPermissionId] = useState<string | null>(null);
+  const isFinished = (() => {
+    const start = new Date(appt.scheduled_at).getTime();
+    const durationMins = Number(appt.duration_minutes ?? 30);
+    const end = start + durationMins * 60_000;
+    return Date.now() >= end;
+  })();
+  const canCancel = !isFinished && appt.status !== "CANCELLED" && appt.status !== "COMPLETED";
 
   useEffect(() => {
     /* Fetch patient name + full detail */
@@ -70,6 +80,7 @@ function AppointmentModal({
     setAccessExpired(false);
     setViewerUrl(null);
     setOpeningFile(permissionId);
+    setRetryPermissionId(permissionId);
     try {
       await api.get(`/doctor/file/${permissionId}/view`, {
         params: { probe: true },
@@ -95,6 +106,29 @@ function AppointmentModal({
     }
   };
 
+  // If a patient extends access after expiry, retry automatically (no full dashboard refresh needed).
+  useEffect(() => {
+    if (!accessExpired) return;
+    if (!retryPermissionId) return;
+    const id = retryPermissionId;
+    const t = window.setInterval(async () => {
+      try {
+        await api.get(`/doctor/file/${id}/view`, { params: { probe: true } });
+        // If probe succeeds, open the viewer immediately.
+        const token = getStoredToken();
+        if (!token) return;
+        const streamBase = `${api.defaults.baseURL}/doctor/file/${id}/view`;
+        const streamUrl = `${streamBase}?access_token=${encodeURIComponent(token)}`;
+        setViewerUrl(streamUrl);
+        setAccessExpired(false);
+        setErrorMessage(null);
+      } catch {
+        // still expired; keep polling
+      }
+    }, 2500);
+    return () => window.clearInterval(t);
+  }, [accessExpired, retryPermissionId]);
+
   const st = STATUS_STYLE[appt.status] ?? STATUS_STYLE.PENDING;
   const pt = PAY_STYLE[appt.payment_status] ?? PAY_STYLE.PENDING;
 
@@ -113,7 +147,7 @@ function AppointmentModal({
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: "white", borderRadius: 28, width: "100%", maxWidth: 540,
+          background: "var(--app-surface)", borderRadius: 28, width: "100%", maxWidth: 540,
           maxHeight: "90vh", overflowY: "auto",
           boxShadow: "0 24px 64px rgba(10,15,40,0.22)",
           fontFamily: "'DM Sans', sans-serif",
@@ -122,14 +156,14 @@ function AppointmentModal({
         {/* Header */}
         <div style={{
           padding: "24px 28px 20px",
-          borderBottom: "1px solid #EEF4FF",
+          borderBottom: "1px solid var(--app-border)",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <div>
             <p style={{ color: "#9CA3AF", fontSize: 13, fontWeight: 600, margin: "0 0 4px" }}>
               Appointment Details
             </p>
-            <h2 style={{ color: "#1a1a2e", fontSize: 20, fontWeight: 900, margin: 0 }}>
+            <h2 style={{ color: "var(--app-fg)", fontSize: 20, fontWeight: 900, margin: 0 }}>
               {detail?.patient_name
                 ? `Patient: ${detail.patient_name}`
                 : "Loading patient info…"}
@@ -165,7 +199,7 @@ function AppointmentModal({
             <Badge label={appt.status} {...st} />
             <Badge
               label={appt.consultation_type === "VIDEO" ? "🎥 Video" : "🏥 In-Person"}
-              bg="#EEF4FF" color="#3B6FE8"
+              bg="#ecfdf5" color="#0d9488"
             />
             <Badge label={`Payment: ${appt.payment_status}`} {...pt} />
           </div>
@@ -183,14 +217,14 @@ function AppointmentModal({
               { icon: Banknote,   label: "Payment Status", value: appt.payment_status },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} style={{
-                background: "#F9FAFB", borderRadius: 16,
+                background: "var(--app-surface-2)", borderRadius: 16,
                 padding: "14px 16px",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Icon size={14} style={{ color: "#3B6FE8" }} />
+                  <Icon size={14} style={{ color: "#0d9488" }} />
                   <span style={{ color: "#9CA3AF", fontSize: 12, fontWeight: 600 }}>{label}</span>
                 </div>
-                <p style={{ color: "#1a1a2e", fontSize: 14, fontWeight: 700, margin: 0, wordBreak: "break-word" }}>
+                <p style={{ color: "var(--app-fg)", fontSize: 14, fontWeight: 700, margin: 0, wordBreak: "break-word" }}>
                   {value}
                 </p>
               </div>
@@ -201,18 +235,18 @@ function AppointmentModal({
           {appt.notes && (
             <div style={{ background: "#FFF9EC", borderRadius: 16, padding: "14px 16px", border: "1px solid #FDE68A" }}>
               <p style={{ color: "#92600A", fontSize: 12, fontWeight: 700, margin: "0 0 4px" }}>Patient Notes</p>
-              <p style={{ color: "#1a1a2e", fontSize: 14, margin: 0 }}>{appt.notes}</p>
+              <p style={{ color: "var(--app-fg)", fontSize: 14, margin: 0 }}>{appt.notes}</p>
             </div>
           )}
 
           {/* Meeting link */}
           {appt.meeting_link && (
-            <div style={{ background: "#EEF4FF", borderRadius: 16, padding: "14px 16px", border: "1px solid #C7D9FF" }}>
-              <p style={{ color: "#3B6FE8", fontSize: 12, fontWeight: 700, margin: "0 0 6px" }}>Video Meeting</p>
+            <div style={{ background: "var(--app-surface-2)", borderRadius: 16, padding: "14px 16px", border: "1px solid var(--app-border)" }}>
+              <p style={{ color: "#0d9488", fontSize: 12, fontWeight: 700, margin: "0 0 6px" }}>Video Meeting</p>
               <a
                 href={appt.meeting_link} target="_blank" rel="noreferrer"
                 style={{
-                  background: "#3B6FE8", color: "white", borderRadius: 12,
+                  background: "#0d9488", color: "white", borderRadius: 12,
                   padding: "8px 18px", fontSize: 14, fontWeight: 700,
                   textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
                 }}
@@ -224,14 +258,14 @@ function AppointmentModal({
 
           {/* Shared Files */}
           <div>
-            <p style={{ color: "#1a1a2e", fontSize: 16, fontWeight: 800, margin: "0 0 12px" }}>
+            <p style={{ color: "var(--app-fg)", fontSize: 16, fontWeight: 800, margin: "0 0 12px" }}>
               Shared Medical Files
             </p>
             {loadingFiles ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#9CA3AF", fontSize: 14 }}>
                 <div style={{
                   width: 18, height: 18, borderRadius: "50%",
-                  border: "3px solid #C7D9FF", borderTopColor: "#3B6FE8",
+                  border: "3px solid #99f6e4", borderTopColor: "#0d9488",
                   animation: "spin 0.8s linear infinite",
                 }} />
                 Loading files…
@@ -248,20 +282,20 @@ function AppointmentModal({
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {files.map((f: any) => (
                   <div key={f.permission_id} style={{
-                    background: "#F9FAFB", borderRadius: 16,
+                    background: "var(--app-surface-2)", borderRadius: 16,
                     padding: "14px 16px",
                     display: "flex", alignItems: "center", gap: 14,
-                    border: "1px solid #EEF4FF",
+                    border: "1px solid var(--app-border)",
                   }}>
                     <div style={{
                       width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                      background: "#EEF4FF",
+                      background: "var(--app-surface)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
-                      <FileText size={20} style={{ color: "#3B6FE8" }} />
+                      <FileText size={20} style={{ color: "#0d9488" }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: "#1a1a2e", fontSize: 14, fontWeight: 700, margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <p style={{ color: "var(--app-fg)", fontSize: 14, fontWeight: 700, margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {f.file_name}
                       </p>
                       <p style={{ color: "#9CA3AF", fontSize: 12, margin: 0 }}>
@@ -272,7 +306,7 @@ function AppointmentModal({
                       onClick={() => openFile(f.permission_id, f.file_name)}
                       disabled={openingFile === f.permission_id}
                       style={{
-                        background: "#3B6FE8", color: "white",
+                        background: "#0d9488", color: "white",
                         border: "none", borderRadius: 12, padding: "8px 16px",
                         fontSize: 13, fontWeight: 700, cursor: "pointer",
                         display: "flex", alignItems: "center", gap: 6,
@@ -290,9 +324,11 @@ function AppointmentModal({
           </div>
 
           {/* Action buttons */}
-          {appt.status === "PENDING" && (
+          {canCancel && (
             <div style={{ display: "flex", gap: 10 }}>
-              <ActionBtn apptId={appt.id} action="confirm" onDone={onClose} />
+              {appt.status === "PENDING" && (
+                <ActionBtn apptId={appt.id} action="confirm" onDone={onClose} />
+              )}
               <ActionBtn apptId={appt.id} action="cancel"  onDone={onClose} variant="red" />
             </div>
           )}
@@ -315,12 +351,12 @@ function AppointmentModal({
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "white", borderRadius: 20, width: "100%", maxWidth: 900,
+              background: "var(--app-surface)", borderRadius: 20, width: "100%", maxWidth: 900,
               boxShadow: "0 24px 64px rgba(10,15,40,0.22)", padding: 18,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1a1a2e" }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--app-fg)" }}>
                 {accessExpired ? "Access Expired" : viewerFileName}
               </p>
               <button
@@ -343,6 +379,29 @@ function AppointmentModal({
                 borderRadius: 14, padding: "14px 16px", fontSize: 14, fontWeight: 600,
               }}>
                 Access expired for this report. Ask the patient to share the file again with an active time window.
+                <div style={{ marginTop: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (retryPermissionId) {
+                        void openFile(retryPermissionId, viewerFileName);
+                      }
+                    }}
+                    style={{
+                      background: "#0d9488",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 12,
+                      padding: "8px 14px",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}
+                  >
+                    Retry access
+                  </button>
+                </div>
               </div>
             ) : (
               <SecurePDFViewer streamUrl={viewerUrl as string} />
@@ -361,11 +420,36 @@ function ActionBtn({
 }) {
   const [loading, setLoading] = useState(false);
   const bg = variant === "green" ? "#16A34A" : "#DC2626";
+  const [cancelChoice, setCancelChoice] = useState<string>("");
+  const [cancelOther, setCancelOther] = useState<string>("");
+  const [showCancelReason, setShowCancelReason] = useState(false);
+
+  const doctorCancelOptions = [
+    "Emergency / unavailable",
+    "Schedule conflict",
+    "Clinic closed / maintenance",
+    "Patient did not respond / unreachable",
+    "Other reason",
+  ];
 
   const handle = async () => {
+    if (action === "cancel" && !showCancelReason) {
+      setShowCancelReason(true);
+      return;
+    }
     setLoading(true);
     try {
-      await api.put(`/appointments/${apptId}/${action}`);
+      if (action === "cancel") {
+        const reason =
+          cancelChoice === "Other reason" ? cancelOther.trim() : cancelChoice.trim();
+        if (!reason) {
+          alert("Please select a reason");
+          return;
+        }
+        await api.put(`/appointments/${apptId}/cancel`, { reason });
+      } else {
+        await api.put(`/appointments/${apptId}/${action}`);
+      }
       onDone();
     } catch (e: any) {
       alert(e.response?.data?.detail || "Action failed");
@@ -375,20 +459,64 @@ function ActionBtn({
   };
 
   return (
-    <button
-      onClick={handle} disabled={loading}
-      style={{
-        flex: 1, background: bg, color: "white", border: "none",
-        borderRadius: 16, padding: "12px", fontSize: 15, fontWeight: 700,
-        cursor: "pointer", opacity: loading ? 0.6 : 1,
-        fontFamily: "'DM Sans', sans-serif",
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-      }}
-    >
-      {action === "confirm"
-        ? <><CheckCircle size={17} /> Confirm</>
-        : <><XCircle size={17} /> Cancel</>}
-    </button>
+    <div style={{ flex: 1 }}>
+      <button
+        onClick={handle} disabled={loading}
+        style={{
+          width: "100%",
+          background: bg, color: "white", border: "none",
+          borderRadius: 16, padding: "12px", fontSize: 15, fontWeight: 700,
+          cursor: "pointer", opacity: loading ? 0.6 : 1,
+          fontFamily: "'DM Sans', sans-serif",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}
+      >
+        {action === "confirm"
+          ? <><CheckCircle size={17} /> Confirm</>
+          : <><XCircle size={17} /> Cancel</>}
+      </button>
+
+      {action === "cancel" && showCancelReason && (
+        <div style={{ marginTop: 10, background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: 16, padding: 12 }}>
+          <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 800, color: "var(--app-fg)" }}>
+            Reason for cancellation
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {doctorCancelOptions.map((opt) => (
+              <label key={opt} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--app-fg)" }}>
+                <input
+                  type="radio"
+                  name={`cancel-reason-${apptId}`}
+                  value={opt}
+                  checked={cancelChoice === opt}
+                  onChange={() => setCancelChoice(opt)}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+          {cancelChoice === "Other reason" && (
+            <textarea
+              value={cancelOther}
+              onChange={(e) => setCancelOther(e.target.value)}
+              rows={2}
+              placeholder="Type your reason..."
+              style={{
+                width: "100%",
+                marginTop: 10,
+                borderRadius: 14,
+                border: "1px solid var(--app-border)",
+                padding: "10px 12px",
+                fontSize: 13,
+                background: "var(--app-surface)",
+                color: "var(--app-fg)",
+                resize: "none",
+              }}
+            />
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -399,6 +527,7 @@ export default function DoctorDashboard() {
   const [loading, setLoading]           = useState(true);
   const [selected, setSelected]         = useState<any>(null);
   const router = useRouter();
+  const deleteDebounceRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const u = getUser();
@@ -431,41 +560,57 @@ export default function DoctorDashboard() {
     CANCELLED: appointments.filter(a => a.status === "CANCELLED"),
   };
 
+  const isAppointmentFinished = (appt: any) => {
+    const start = new Date(appt.scheduled_at).getTime();
+    const durationMins = Number(appt.duration_minutes ?? 30);
+    const end = start + durationMins * 60_000;
+    return Date.now() >= end;
+  };
+
+  const deleteAppointment = async (id: string) => {
+    const now = Date.now();
+    const last = deleteDebounceRef.current[id] ?? 0;
+    if (now - last < 900) return;
+    deleteDebounceRef.current[id] = now;
+
+    if (!confirm("Delete this finished appointment from your list?")) return;
+    try {
+      await api.delete(`/appointments/${id}`);
+      setAppointments((prev) => prev.filter((a) => a.id !== id));
+      if (selected?.id === id) setSelected(null);
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "Failed to delete appointment");
+    }
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: "#EEF4FF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "var(--app-bg)", fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap');
         * { box-sizing: border-box; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .appt-card { transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; }
-        .appt-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(59,111,232,0.16) !important; }
+        .appt-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(13,148,136,0.16) !important; }
       `}</style>
 
       {/* NAV */}
-      <nav className="bg-white sticky top-0 z-20" style={{ borderBottom: "1px solid #C7D9FF" }}>
+      <nav className="sticky top-0 z-20" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 14, background: "#3B6FE8", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(59,111,232,0.35)" }}>
-              <span style={{ color: "white", fontWeight: 900, fontSize: 20 }}>S</span>
-            </div>
-            <div>
-              <p style={{ color: "#1a1a2e", fontWeight: 900, fontSize: 20, margin: 0, letterSpacing: "-0.4px" }}>SHARE</p>
-              <p style={{ color: "#3B6FE8", fontWeight: 600, fontSize: 12, margin: 0 }}>Doctor Portal</p>
-            </div>
-          </div>
+          <ShareNavWordmark markSize={46} subtitle="Doctor Portal" />
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Link href="/doctor-availability"
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                background: "#EEF4FF", color: "#3B6FE8",
+                background: "var(--app-surface-2)", color: "#0d9488",
                 borderRadius: 99, padding: "10px 18px",
                 fontWeight: 700, fontSize: 14, textDecoration: "none",
               }}>
               <Clock size={15} /> Set Availability
             </Link>
+            <ThemeToggle />
             <button onClick={logout} style={{
               display: "flex", alignItems: "center", gap: 6,
-              background: "#FEF2F2", color: "#EF4444",
+              background: "var(--app-danger-surface)", color: "var(--app-danger)",
               border: "none", borderRadius: 99, padding: "10px 18px",
               fontWeight: 700, fontSize: 14, cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif",
@@ -480,47 +625,47 @@ export default function DoctorDashboard() {
 
         {/* Page heading */}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ color: "#1a1a2e", fontSize: 32, fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.5px" }}>
+          <h1 style={{ color: "var(--app-fg)", fontSize: 32, fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.5px" }}>
             Doctor Dashboard
           </h1>
-          <p style={{ color: "#6b7280", fontSize: 17, margin: 0 }}>
+          <p style={{ color: "var(--app-muted)", fontSize: 17, margin: 0 }}>
             Click any appointment to see full details and patient files.
           </p>
         </div>
 
         {/* Shared records notifications */}
         <div style={{
-          background: "white", borderRadius: 20,
-          border: "1.5px solid #C7D9FF",
+          background: "var(--app-surface)", borderRadius: 20,
+          border: "1.5px solid var(--app-border)",
           padding: "16px 18px",
           marginBottom: 22,
-          boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
+          boxShadow: "0 2px 8px rgba(13,148,136,0.06)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <div style={{
-              width: 34, height: 34, borderRadius: 10, background: "#EEF4FF",
+              width: 34, height: 34, borderRadius: 10, background: "#ecfdf5",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <BellRing size={16} style={{ color: "#3B6FE8" }} />
+              <BellRing size={16} style={{ color: "#0d9488" }} />
             </div>
-            <p style={{ color: "#1a1a2e", fontSize: 16, fontWeight: 800, margin: 0 }}>
+            <p style={{ color: "var(--app-fg)", fontSize: 16, fontWeight: 800, margin: 0 }}>
               Shared Records Alerts
             </p>
           </div>
           {sharedNotifications.length === 0 ? (
-            <p style={{ margin: 0, color: "#9CA3AF", fontSize: 14 }}>
+            <p style={{ margin: 0, color: "var(--app-muted)", fontSize: 14 }}>
               No new shared reports yet.
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {sharedNotifications.slice(0, 3).map((n: any) => (
                 <div key={n.permission_id} style={{
-                  background: "#F9FAFB", border: "1px solid #EEF4FF", borderRadius: 12, padding: "10px 12px",
+                  background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: 12, padding: "10px 12px",
                 }}>
-                  <p style={{ margin: 0, color: "#1a1a2e", fontSize: 13, fontWeight: 700 }}>
+                  <p style={{ margin: 0, color: "var(--app-fg)", fontSize: 13, fontWeight: 700 }}>
                     {n.patient_name} shared a {n.report_type} report
                   </p>
-                  <p style={{ margin: "2px 0 0", color: "#6B7280", fontSize: 12 }}>
+                  <p style={{ margin: "2px 0 0", color: "var(--app-muted)", fontSize: 12 }}>
                     {n.file_name}
                   </p>
                 </div>
@@ -534,7 +679,7 @@ export default function DoctorDashboard() {
           {[
             { label: "Pending",   count: groupedAppts.PENDING.length,   bg: "#FEF9C3", color: "#854D0E", border: "#FDE68A" },
             { label: "Confirmed", count: groupedAppts.CONFIRMED.length, bg: "#DCFCE7", color: "#166534", border: "#86EFAC" },
-            { label: "Completed", count: groupedAppts.COMPLETED.length, bg: "#EEF4FF", color: "#1e40af", border: "#C7D9FF" },
+            { label: "Completed", count: groupedAppts.COMPLETED.length, bg: "#ecfdf5", color: "#115e59", border: "#99f6e4" },
             { label: "Cancelled", count: groupedAppts.CANCELLED.length, bg: "#FEE2E2", color: "#991B1B", border: "#FECACA" },
           ].map(s => (
             <div key={s.label} style={{ background: s.bg, borderRadius: 20, padding: "20px 22px", border: `1.5px solid ${s.border}` }}>
@@ -547,13 +692,13 @@ export default function DoctorDashboard() {
         {/* Appointment list */}
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 80 }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", border: "4px solid #C7D9FF", borderTopColor: "#3B6FE8", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", border: "4px solid #99f6e4", borderTopColor: "#0d9488", animation: "spin 0.8s linear infinite" }} />
           </div>
         ) : appointments.length === 0 ? (
           <div style={{ textAlign: "center", paddingTop: 80 }}>
-            <Calendar size={52} style={{ color: "#C7D9FF", margin: "0 auto 16px" }} />
-            <p style={{ color: "#1a1a2e", fontWeight: 800, fontSize: 20 }}>No appointments yet</p>
-            <p style={{ color: "#9CA3AF", fontSize: 16 }}>Patients will appear here once they book.</p>
+            <Calendar size={52} style={{ color: "#99f6e4", margin: "0 auto 16px" }} />
+            <p style={{ color: "var(--app-fg)", fontWeight: 800, fontSize: 20 }}>No appointments yet</p>
+            <p style={{ color: "var(--app-muted)", fontSize: 16 }}>Patients will appear here once they book.</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -565,11 +710,11 @@ export default function DoctorDashboard() {
                   className="appt-card"
                   onClick={() => setSelected(appt)}
                   style={{
-                    background: "white", borderRadius: 22,
-                    border: "1.5px solid #C7D9FF",
+                    background: "var(--app-surface)", borderRadius: 22,
+                    border: "1.5px solid var(--app-border)",
                     padding: "22px 28px",
                     display: "flex", alignItems: "center", gap: 20,
-                    boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
+                    boxShadow: "0 2px 8px rgba(13,148,136,0.06)",
                   }}
                 >
                   {/* Left colour strip */}
@@ -581,32 +726,54 @@ export default function DoctorDashboard() {
                       <Badge label={appt.status} {...st} />
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        background: "#EEF4FF", color: "#3B6FE8",
+                        background: "var(--app-surface-2)", color: "#0d9488",
                         borderRadius: 99, padding: "3px 12px", fontSize: 12, fontWeight: 700,
                       }}>
                         {appt.consultation_type === "VIDEO" ? <><Video size={11} /> Video</> : <><Building2 size={11} /> In-Person</>}
                       </span>
                     </div>
-                    <p style={{ color: "#1a1a2e", fontWeight: 900, fontSize: 18, margin: "0 0 2px", letterSpacing: "-0.2px" }}>
+                    <p style={{ color: "var(--app-fg)", fontWeight: 900, fontSize: 18, margin: "0 0 2px", letterSpacing: "-0.2px" }}>
                       {appt.patient_name || "Patient"}
                     </p>
-                    <p style={{ color: "#1a1a2e", fontWeight: 800, fontSize: 15, margin: "0 0 4px" }}>
+                    <p style={{ color: "var(--app-fg)", fontWeight: 800, fontSize: 15, margin: "0 0 4px" }}>
                       {new Date(appt.scheduled_at).toLocaleString("en-IN", { dateStyle: "full", timeStyle: "short" })}
                     </p>
                     {appt.notes && (
-                      <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>
+                      <p style={{ color: "var(--app-muted)", fontSize: 14, margin: 0 }}>
                         Notes: {appt.notes}
                       </p>
                     )}
                   </div>
 
                   {/* Right: fee + chevron */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ color: "#16A34A", fontWeight: 900, fontSize: 20, margin: "0 0 2px" }}>₹{appt.payment_amount}</p>
                       <Badge label={appt.payment_status} {...PAY_STYLE[appt.payment_status] ?? PAY_STYLE.PENDING} />
                     </div>
-                    <ChevronRight size={20} style={{ color: "#C7D9FF" }} />
+                    {isAppointmentFinished(appt) && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); void deleteAppointment(appt.id); }}
+                        aria-label="Delete appointment"
+                        title="Delete"
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 999,
+                          border: "none",
+                          background: "rgba(239,68,68,0.08)",
+                          color: "#ef4444",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                    <ChevronRight size={20} style={{ color: "#99f6e4" }} />
                   </div>
                 </div>
               );

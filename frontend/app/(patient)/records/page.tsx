@@ -1,9 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "@/lib/axios";
 import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareMark } from "@/components/branding/share-brand";
 import { FileText, Upload, Share2, XCircle, LogOut, ChevronLeft, Trash2 } from "lucide-react";
 
 type MedicalFile = {
@@ -61,6 +63,7 @@ export default function RecordsPage() {
   useEffect(() => {
     const u = getUser();
     if (!u) { router.push("/login"); return; }
+    if (u.role !== "PATIENT") { router.push("/login"); return; }
     void Promise.all([fetchFiles(), fetchDoctors(), fetchAppointments(), fetchShares()]);
   }, [router]);
 
@@ -68,6 +71,16 @@ export default function RecordsPage() {
     try {
       const res = await api.get("/files/mine");
       setFiles(res.data.data);
+    } catch (err: unknown) {
+      const status =
+        typeof err === "object" && err && "response" in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 401 || status === 403) {
+        router.push("/login");
+        return;
+      }
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -253,6 +266,54 @@ export default function RecordsPage() {
     }
   };
 
+  const extendOptions = [
+    { label: "Extend by 24 Hours", value: "24H" as const, seconds: 24 * 3600 },
+    { label: "Extend by 3 Days", value: "3D" as const, seconds: 3 * 24 * 3600 },
+    { label: "Extend by 1 Week", value: "1W" as const, seconds: 7 * 24 * 3600 },
+  ];
+
+  const [extendingPermissionId, setExtendingPermissionId] = useState<string | null>(null);
+  const [extendChoiceByPermission, setExtendChoiceByPermission] = useState<Record<string, "24H" | "3D" | "1W">>({});
+  const extendDebounceRef = useRef<Record<string, number>>({});
+
+  const extendAccess = async (permissionId: string) => {
+    const now = Date.now();
+    const last = extendDebounceRef.current[permissionId] ?? 0;
+    if (now - last < 900) return; // debounce rapid clicks
+    extendDebounceRef.current[permissionId] = now;
+
+    const choice = extendChoiceByPermission[permissionId] ?? "24H";
+    setExtendingPermissionId(permissionId);
+    try {
+      const res = await api.post(`/files/permissions/${permissionId}/extend`, { extend_by: choice });
+      const newExpiresAt = res.data?.data?.expires_at as string | undefined;
+      if (newExpiresAt) {
+        setShares((prev) =>
+          prev.map((p) => (p.permission_id === permissionId ? { ...p, expires_at: newExpiresAt } : p))
+        );
+      } else {
+        // Fallback: optimistic update if API shape changes
+        const optSeconds = extendOptions.find((o) => o.value === choice)?.seconds ?? 0;
+        setShares((prev) =>
+          prev.map((p) => {
+            if (p.permission_id !== permissionId) return p;
+            const cur = new Date(p.expires_at).getTime();
+            return { ...p, expires_at: new Date(cur + optSeconds * 1000).toISOString() };
+          })
+        );
+      }
+      setFeedback({ kind: "success", message: "Access extended successfully." });
+    } catch (err: unknown) {
+      const detail =
+        typeof err === "object" && err && "response" in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : undefined;
+      setFeedback({ kind: "error", message: detail || "Failed to extend access" });
+    } finally {
+      setExtendingPermissionId(null);
+    }
+  };
+
   const getAccessStatus = (p: SharePermission) => {
     const now = new Date().getTime();
     if (p.revoked_at) return { label: "Revoked", cls: "bg-red-50 text-red-700 border-red-200" };
@@ -269,24 +330,50 @@ export default function RecordsPage() {
     return { label: `Access: ${remaining} · Expires after ${expLabel}`, cls: "bg-blue-50 text-blue-700 border-blue-200" };
   };
 
+  const getExpiryMeta = (p: SharePermission) => {
+    if (p.revoked_at) return { state: "revoked" as const, remainingMs: 0 };
+    const now = Date.now();
+    const exp = new Date(p.expires_at).getTime();
+    const remainingMs = exp - now;
+    if (remainingMs <= 0) return { state: "expired" as const, remainingMs };
+    // show Continue Access within 1 hour and 1 minute
+    if (remainingMs <= (61 * 60 * 1000)) return { state: "soon" as const, remainingMs };
+    return { state: "ok" as const, remainingMs };
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard"
-            className="flex items-center gap-2 text-gray-600 hover:text-indigo-600">
-            <ChevronLeft size={20} /> Dashboard
-          </Link>
-          <button onClick={logout}
-            className="flex items-center gap-1 text-red-500 text-sm">
-            <LogOut size={16} /> Logout
-          </button>
+    <div className="min-h-screen text-[var(--app-fg)]">
+      <nav className="shadow-sm border-b" style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-5 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <ShareMark size={36} />
+              <span className="font-black text-lg tracking-tight" style={{ color: "var(--app-fg)" }}>
+                SHARE
+              </span>
+            </div>
+            <Link href="/dashboard"
+              className="flex items-center gap-2 hover:text-teal-700"
+              style={{ color: "var(--app-muted)" }}
+            >
+              <ChevronLeft size={20} /> Dashboard
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <button onClick={logout}
+              className="flex items-center gap-1 text-sm"
+              style={{ color: "var(--app-danger)" }}
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">My Medical Records</h2>
+          <h2 className="text-2xl font-bold" style={{ color: "var(--app-fg)" }}>My Medical Records</h2>
           <label className={`bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-indigo-700 flex items-center gap-2 ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
             <Upload size={18} />
             {uploading ? "Uploading..." : "Upload File"}
@@ -313,18 +400,18 @@ export default function RecordsPage() {
         )}
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-          <p className="text-blue-700 text-sm">
+          <p className="text-sm" style={{ color: "var(--app-primary)" }}>
             🔒 Your files are stored privately. Only you can see them unless you explicitly share with a doctor.
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading...</div>
+          <div className="text-center py-20" style={{ color: "var(--app-muted)" }}>Loading...</div>
         ) : files.length === 0 ? (
           <div className="text-center py-20">
-            <FileText size={48} className="text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-400">No files uploaded yet.</p>
-            <p className="text-gray-400 text-sm mt-1">
+            <FileText size={48} className="mx-auto mb-4" style={{ color: "var(--app-border)" }} />
+            <p style={{ color: "var(--app-muted)" }}>No files uploaded yet.</p>
+            <p className="text-sm mt-1" style={{ color: "var(--app-muted)" }}>
               Click &quot;Upload File&quot; to add your first medical record.
             </p>
           </div>
@@ -332,15 +419,17 @@ export default function RecordsPage() {
           <div className="space-y-4">
             {files.map((file) => (
               <div key={file.id}
-                className="bg-white rounded-2xl shadow-sm border p-6">
+                className="rounded-2xl shadow-sm border p-6"
+                style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <FileText className="text-purple-600" size={20} />
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "var(--app-surface-2)" }}>
+                      <FileText style={{ color: "var(--app-primary)" }} size={20} />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">{file.name}</p>
-                      <p className="text-gray-400 text-xs mt-0.5">
+                      <p className="font-medium" style={{ color: "var(--app-fg)" }}>{file.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--app-muted)" }}>
                         {(file.size_bytes / 1024).toFixed(1)} KB ·{" "}
                         {new Date(file.uploaded_at).toLocaleDateString("en-IN")}
                       </p>
@@ -388,6 +477,7 @@ export default function RecordsPage() {
                       .slice(0, 3)
                       .map((p) => {
                         const st = getAccessStatus(p);
+                        const meta = getExpiryMeta(p);
                         return (
                           <div
                             key={p.permission_id}
@@ -399,7 +489,60 @@ export default function RecordsPage() {
                                 {p.revoked_at ? "Revoked" : new Date(p.expires_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                               </span>
                             </div>
-                            <div className="mt-1 opacity-90">{st.label}</div>
+                            <div className="mt-1 flex items-center justify-between gap-2">
+                              <span className="opacity-90">{st.label}</span>
+                              {meta.state === "soon" && (
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                                  Expiring Soon
+                                </span>
+                              )}
+                              {meta.state === "expired" && (
+                                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
+                                  Expired
+                                </span>
+                              )}
+                            </div>
+
+                            {meta.state === "soon" && !p.revoked_at && (
+                              <div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[12px] text-amber-900 border border-amber-200">
+                                Your shared reports with Dr. {p.doctor_name} will be revoked on{" "}
+                                {new Date(p.expires_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}. Do you want to continue sharing?
+                              </div>
+                            )}
+
+                            {(meta.state === "soon" || meta.state === "expired") && !p.revoked_at && (
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <select
+                                  value={extendChoiceByPermission[p.permission_id] ?? "24H"}
+                                  onChange={(e) =>
+                                    setExtendChoiceByPermission((prev) => ({
+                                      ...prev,
+                                      [p.permission_id]: e.target.value as "24H" | "3D" | "1W",
+                                    }))
+                                  }
+                                  className="rounded-lg border px-2 py-1 text-xs"
+                                  style={{ borderColor: "var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
+                                >
+                                  {extendOptions.map((o) => (
+                                    <option key={o.value} value={o.value}>
+                                      {o.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => void extendAccess(p.permission_id)}
+                                  disabled={extendingPermissionId === p.permission_id}
+                                  className={`rounded-lg px-3 py-1 text-xs font-semibold shadow-sm ${
+                                    extendingPermissionId === p.permission_id
+                                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                                  }`}
+                                >
+                                  {extendingPermissionId === p.permission_id ? "Extending..." : "Continue Access"}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -407,13 +550,13 @@ export default function RecordsPage() {
                 )}
 
                 {sharing === file.id && (
-                  <div className="mt-4 bg-gray-50 rounded-xl p-4 border">
-                    <p className="text-sm font-medium text-gray-700 mb-3">
+                  <div className="mt-4 rounded-xl p-4 border" style={{ background: "var(--app-surface-2)", borderColor: "var(--app-border)" }}>
+                    <p className="text-sm font-medium mb-3" style={{ color: "var(--app-fg)" }}>
                       Share with a Doctor
                     </p>
 
                     {doctors.length === 0 ? (
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-sm" style={{ color: "var(--app-muted)" }}>
                         No approved doctors found.
                       </p>
                     ) : (
@@ -423,7 +566,8 @@ export default function RecordsPage() {
                           onChange={(e) => setShareForm({
                             ...shareForm, doctor_id: e.target.value
                           })}
-                          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+                          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          style={{ borderColor: "var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
                         >
                           <option value="">Select a doctor...</option>
                           {doctors.map((doc) => (
@@ -439,32 +583,34 @@ export default function RecordsPage() {
                         </select>
 
                         <label className="flex flex-col gap-1">
-                          <span className="text-xs font-medium text-gray-600">Access Start</span>
+                          <span className="text-xs font-medium" style={{ color: "var(--app-muted)" }}>Access Start</span>
                           <input
                             type="datetime-local"
                             value={shareForm.start_date}
                             onChange={(e) => setShareForm({
                               ...shareForm, start_date: e.target.value
                             })}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            style={{ borderColor: "var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
                           />
                         </label>
                         <label className="flex flex-col gap-1">
-                          <span className="text-xs font-medium text-gray-600">Access End</span>
+                          <span className="text-xs font-medium" style={{ color: "var(--app-muted)" }}>Access End</span>
                           <input
                             type="datetime-local"
                             value={shareForm.end_date}
                             onChange={(e) => setShareForm({
                               ...shareForm, end_date: e.target.value
                             })}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            style={{ borderColor: "var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
                           />
                         </label>
                       </div>
                     )}
 
-                    <p className="text-xs text-gray-500 mt-2">
-                      Access end time is enforced by the system and expires at your next appointment conclusion.
+                    <p className="text-xs mt-2" style={{ color: "var(--app-muted)" }}>
+                      Tip: The appointment window is only a suggestion. You can adjust the end time manually, and SHARE will use the selected end time.
                     </p>
 
                     {suggestion && (

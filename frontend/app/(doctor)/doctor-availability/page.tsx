@@ -5,6 +5,8 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, LogOut, ChevronLeft } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareNavWordmark } from "@/components/branding/share-brand";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -81,15 +83,21 @@ export default function AvailabilityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/doctor-dashboard" className="flex items-center gap-2 text-gray-600 hover:text-indigo-600">
-            <ChevronLeft size={20} /> Dashboard
-          </Link>
-          <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
-            <LogOut size={16} /> Logout
-          </button>
+    <div className="min-h-screen text-[var(--app-fg)]">
+      <nav className="shadow-sm border-b" style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-5 min-w-0">
+            <ShareNavWordmark markSize={36} subtitle="Doctor Portal" />
+            <Link href="/doctor-dashboard" className="flex items-center gap-2 text-gray-600 hover:text-teal-700">
+              <ChevronLeft size={20} /> Dashboard
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 

@@ -1,0 +1,15 @@
+{
+  "name": "SHARE — Healthcare Platform",
+  "short_name": "SHARE",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#aaf0d1",
+  "background_color": "#f6fdfb",
+  "display": "standalone"
+}

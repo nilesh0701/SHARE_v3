@@ -4,6 +4,8 @@ import api from "@/lib/axios";
 import { getUser, getStoredToken, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, LogOut, Users, Calendar, FileText, Clock } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareNavWordmark } from "@/components/branding/share-brand";
 
 export default function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
@@ -93,24 +95,27 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
+      <nav className="shadow-sm border-b" style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-indigo-600">SHARE — Admin</h1>
-          <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
-            <LogOut size={16} /> Logout
-          </button>
+          <ShareNavWordmark markSize={40} subtitle="Admin" />
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <button onClick={logout} className="flex items-center gap-1 text-sm" style={{ color: "var(--app-danger)" }}>
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-8">Admin Dashboard</h2>
+        <h2 className="text-2xl font-bold mb-8" style={{ color: "var(--app-fg)" }}>Admin Dashboard</h2>
 
         {/* Stats */}
         {reports && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { label: "Total Doctors", value: reports.total_doctors, icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
+              { label: "Total Doctors", value: reports.total_doctors, icon: Users, color: "text-teal-700", bg: "bg-teal-50" },
               { label: "Total Patients", value: reports.total_patients, icon: Users, color: "text-green-600", bg: "bg-green-50" },
               { label: "Total Appointments", value: reports.total_appointments, icon: Calendar, color: "text-blue-600", bg: "bg-blue-50" },
               { label: "Pending Reviews", value: reports.pending_verifications, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
@@ -120,8 +125,8 @@ export default function AdminDashboard() {
                 type="button"
                 onClick={stat.label === "Total Doctors" ? () => void toggleDoctorsPanel() : undefined}
                 className={`bg-white rounded-2xl shadow-sm border p-5 text-left w-full ${
-                  stat.label === "Total Doctors" ? "cursor-pointer hover:border-indigo-300 transition" : "cursor-default"
-                } ${showDoctors && stat.label === "Total Doctors" ? "border-indigo-500 ring-2 ring-indigo-100" : ""}`}
+                  stat.label === "Total Doctors" ? "cursor-pointer hover:border-teal-300 transition" : "cursor-default"
+                } ${showDoctors && stat.label === "Total Doctors" ? "border-teal-500 ring-2 ring-teal-100" : ""}`}
               >
                 <div className={`w-10 h-10 ${stat.bg} rounded-lg flex items-center justify-center mb-3`}>
                   <stat.icon className={stat.color} size={20} />
@@ -147,7 +152,7 @@ export default function AdminDashboard() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="font-semibold text-gray-800">Dr. {doc.full_name}</p>
-                        <p className="text-indigo-600 text-sm">{doc.specialty}</p>
+                        <p className="text-teal-700 text-sm">{doc.specialty}</p>
                         <p className="text-gray-500 text-sm mt-1">{doc.email}</p>
                         <p className="text-gray-500 text-sm">
                           {doc.consultation_type} · ₹{doc.consultation_fee}
@@ -199,7 +204,7 @@ export default function AdminDashboard() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-semibold text-gray-800">Dr. {doc.full_name}</h4>
-                      <p className="text-indigo-600 text-sm">{doc.specialty}</p>
+                      <p className="text-teal-700 text-sm">{doc.specialty}</p>
                       <p className="text-gray-500 text-sm mt-1">{doc.email}</p>
                       <p className="text-gray-500 text-sm">
                         {doc.consultation_type} · ₹{doc.consultation_fee}
@@ -209,7 +214,7 @@ export default function AdminDashboard() {
                         <button
                           type="button"
                           onClick={() => downloadCertificate(doc.user_id, doc.full_name)}
-                          className="text-indigo-600 hover:underline text-sm mt-2 inline-flex items-center gap-1">
+                          className="text-teal-700 hover:underline text-sm mt-2 inline-flex items-center gap-1">
                           <FileText size={14} /> Download Certificate
                         </button>
                       )}
