@@ -5,6 +5,7 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareMark } from "@/components/branding/share-brand";
 import { FileText, Upload, Share2, XCircle, LogOut, ChevronLeft, Trash2 } from "lucide-react";
 
 type MedicalFile = {
@@ -341,15 +342,23 @@ export default function RecordsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
+    <div className="min-h-screen text-[var(--app-fg)]">
       <nav className="shadow-sm border-b" style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard"
-            className="flex items-center gap-2 hover:text-indigo-600"
-            style={{ color: "var(--app-muted)" }}
-          >
-            <ChevronLeft size={20} /> Dashboard
-          </Link>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-5 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <ShareMark size={36} />
+              <span className="font-black text-lg tracking-tight" style={{ color: "var(--app-fg)" }}>
+                SHARE
+              </span>
+            </div>
+            <Link href="/dashboard"
+              className="flex items-center gap-2 hover:text-teal-700"
+              style={{ color: "var(--app-muted)" }}
+            >
+              <ChevronLeft size={20} /> Dashboard
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             <ThemeToggle size="sm" />
             <button onClick={logout}

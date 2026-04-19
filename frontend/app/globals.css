@@ -6,14 +6,15 @@
   --foreground: #171717;
 
   /* App tokens (used across pages via var(...)) */
-  --app-bg: #eef4ff;
-  --app-fg: #1a1a2e;
-  --app-muted: #6b7280;
+  --share-brand-accent: #0f766e;
+  --app-bg: transparent;
+  --app-fg: #1a1a1a;
+  --app-muted: #64748b;
   --app-surface: #ffffff;
-  --app-surface-2: #f9fafb;
-  --app-border: #c7d9ff;
-  --app-primary: #3b6fe8;
-  --app-primary-2: #6b99ff;
+  --app-surface-2: #f4fbf8;
+  --app-border: #b8e8dc;
+  --app-primary: #0d9488;
+  --app-primary-2: #2dd4bf;
   --app-danger: #ef4444;
   --app-danger-surface: #fef2f2;
 }
@@ -31,17 +32,18 @@ html[data-theme="light"] {
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --background: #070a12;
-  --foreground: #e5e7eb;
+  --background: #0c1412;
+  --foreground: #e8f5f0;
 
-  --app-bg: #070b18;
-  --app-fg: #e5e7eb;
-  --app-muted: #a3aab8;
-  --app-surface: #0f172a;
-  --app-surface-2: #111827;
-  --app-border: #243244;
-  --app-primary: #7aa2ff;
-  --app-primary-2: #3b6fe8;
+  --share-brand-accent: #5eead4;
+  --app-bg: transparent;
+  --app-fg: #e8f5f0;
+  --app-muted: #94b8ad;
+  --app-surface: #12201c;
+  --app-surface-2: #0f1c18;
+  --app-border: #1f3d34;
+  --app-primary: #2dd4bf;
+  --app-primary-2: #14b8a6;
   --app-danger: #fb7185;
   --app-danger-surface: rgba(251, 113, 133, 0.14);
 }
@@ -52,7 +54,7 @@ html[data-theme="dark"] .bg-white {
 }
 
 html[data-theme="dark"] .bg-gray-50 {
-  background-color: var(--app-bg) !important;
+  background-color: var(--app-surface-2) !important;
 }
 
 html[data-theme="dark"] .bg-gray-100 {
@@ -76,26 +78,76 @@ html[data-theme="dark"] .border-b {
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@keyframes shareBgShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Subtle mesh gradient pulse — mint, sky blue, off-white (light) */
+@keyframes shareMeshDrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(2%, -1.5%, 0) scale(1.03);
+  }
+  66% {
+    transform: translate3d(-1.5%, 2%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 
+@keyframes shareMeshPulseOpacity {
+  0%,
+  100% {
+    opacity: 0.92;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.share-mesh-bg {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background-color: #f6fdfb;
+}
+
+.share-mesh-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform, opacity;
+  background:
+    radial-gradient(ellipse 85% 65% at 15% 15%, rgba(170, 240, 209, 0.55) 0%, transparent 58%),
+    radial-gradient(ellipse 75% 55% at 85% 20%, rgba(135, 206, 235, 0.42) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 75% 85%, rgba(167, 243, 228, 0.38) 0%, transparent 52%),
+    radial-gradient(ellipse 65% 50% at 10% 80%, rgba(186, 230, 253, 0.35) 0%, transparent 50%),
+    linear-gradient(165deg, #f8fffe 0%, #eefbf6 45%, #f2f9fd 100%);
+  animation: shareMeshDrift 28s ease-in-out infinite, shareMeshPulseOpacity 14s ease-in-out infinite;
+}
+
+html[data-theme="dark"] .share-mesh-bg {
+  background-color: #0a1210;
+}
+
+html[data-theme="dark"] .share-mesh-bg::before {
+  background:
+    radial-gradient(ellipse 85% 65% at 15% 15%, rgba(20, 184, 166, 0.18) 0%, transparent 58%),
+    radial-gradient(ellipse 75% 55% at 85% 25%, rgba(56, 189, 248, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 70% 90%, rgba(45, 212, 191, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 65% 50% at 8% 75%, rgba(94, 234, 212, 0.08) 0%, transparent 50%),
+    linear-gradient(165deg, #0c1412 0%, #0f1e1a 50%, #0a1614 100%);
+  animation: shareMeshDrift 32s ease-in-out infinite, shareMeshPulseOpacity 16s ease-in-out infinite;
+}
+
+/* Legacy class — mesh is global; keep alias for any straggling imports */
 .share-animated-bg {
-  background: linear-gradient(120deg, #eaf1ff, #dfe9ff, #edf7ff);
-  background-size: 220% 220%;
-  animation: shareBgShift 24s ease-in-out infinite;
-}
-
-html[data-theme="dark"] .share-animated-bg {
-  background: linear-gradient(120deg, #071225, #0c1a33, #0a1630);
-  background-size: 220% 220%;
+  background: transparent;
 }
 
 ::placeholder {

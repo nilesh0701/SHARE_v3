@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SecurePDFViewer from "@/components/secure-pdf-viewer";
 import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareNavWordmark } from "@/components/branding/share-brand";
 import {
   Calendar, Clock, Video, Building2, LogOut, CheckCircle,
   XCircle, FileText, X, User, CreditCard,
@@ -198,7 +199,7 @@ function AppointmentModal({
             <Badge label={appt.status} {...st} />
             <Badge
               label={appt.consultation_type === "VIDEO" ? "🎥 Video" : "🏥 In-Person"}
-              bg="#EEF4FF" color="#3B6FE8"
+              bg="#ecfdf5" color="#0d9488"
             />
             <Badge label={`Payment: ${appt.payment_status}`} {...pt} />
           </div>
@@ -220,7 +221,7 @@ function AppointmentModal({
                 padding: "14px 16px",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Icon size={14} style={{ color: "#3B6FE8" }} />
+                  <Icon size={14} style={{ color: "#0d9488" }} />
                   <span style={{ color: "#9CA3AF", fontSize: 12, fontWeight: 600 }}>{label}</span>
                 </div>
                 <p style={{ color: "var(--app-fg)", fontSize: 14, fontWeight: 700, margin: 0, wordBreak: "break-word" }}>
@@ -241,11 +242,11 @@ function AppointmentModal({
           {/* Meeting link */}
           {appt.meeting_link && (
             <div style={{ background: "var(--app-surface-2)", borderRadius: 16, padding: "14px 16px", border: "1px solid var(--app-border)" }}>
-              <p style={{ color: "#3B6FE8", fontSize: 12, fontWeight: 700, margin: "0 0 6px" }}>Video Meeting</p>
+              <p style={{ color: "#0d9488", fontSize: 12, fontWeight: 700, margin: "0 0 6px" }}>Video Meeting</p>
               <a
                 href={appt.meeting_link} target="_blank" rel="noreferrer"
                 style={{
-                  background: "#3B6FE8", color: "white", borderRadius: 12,
+                  background: "#0d9488", color: "white", borderRadius: 12,
                   padding: "8px 18px", fontSize: 14, fontWeight: 700,
                   textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
                 }}
@@ -264,7 +265,7 @@ function AppointmentModal({
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#9CA3AF", fontSize: 14 }}>
                 <div style={{
                   width: 18, height: 18, borderRadius: "50%",
-                  border: "3px solid #C7D9FF", borderTopColor: "#3B6FE8",
+                  border: "3px solid #99f6e4", borderTopColor: "#0d9488",
                   animation: "spin 0.8s linear infinite",
                 }} />
                 Loading files…
@@ -291,7 +292,7 @@ function AppointmentModal({
                       background: "var(--app-surface)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
-                      <FileText size={20} style={{ color: "#3B6FE8" }} />
+                      <FileText size={20} style={{ color: "#0d9488" }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ color: "var(--app-fg)", fontSize: 14, fontWeight: 700, margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -305,7 +306,7 @@ function AppointmentModal({
                       onClick={() => openFile(f.permission_id, f.file_name)}
                       disabled={openingFile === f.permission_id}
                       style={{
-                        background: "#3B6FE8", color: "white",
+                        background: "#0d9488", color: "white",
                         border: "none", borderRadius: 12, padding: "8px 16px",
                         fontSize: 13, fontWeight: 700, cursor: "pointer",
                         display: "flex", alignItems: "center", gap: 6,
@@ -387,7 +388,7 @@ function AppointmentModal({
                       }
                     }}
                     style={{
-                      background: "#3B6FE8",
+                      background: "#0d9488",
                       color: "white",
                       border: "none",
                       borderRadius: 12,
@@ -589,26 +590,18 @@ export default function DoctorDashboard() {
         * { box-sizing: border-box; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .appt-card { transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; }
-        .appt-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(59,111,232,0.16) !important; }
+        .appt-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(13,148,136,0.16) !important; }
       `}</style>
 
       {/* NAV */}
       <nav className="sticky top-0 z-20" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 14, background: "#3B6FE8", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(59,111,232,0.35)" }}>
-              <span style={{ color: "white", fontWeight: 900, fontSize: 20 }}>S</span>
-            </div>
-            <div>
-              <p style={{ color: "var(--app-fg)", fontWeight: 900, fontSize: 20, margin: 0, letterSpacing: "-0.4px" }}>SHARE</p>
-              <p style={{ color: "#3B6FE8", fontWeight: 600, fontSize: 12, margin: 0 }}>Doctor Portal</p>
-            </div>
-          </div>
+          <ShareNavWordmark markSize={46} subtitle="Doctor Portal" />
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Link href="/doctor-availability"
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                background: "var(--app-surface-2)", color: "#3B6FE8",
+                background: "var(--app-surface-2)", color: "#0d9488",
                 borderRadius: 99, padding: "10px 18px",
                 fontWeight: 700, fontSize: 14, textDecoration: "none",
               }}>
@@ -646,14 +639,14 @@ export default function DoctorDashboard() {
           border: "1.5px solid var(--app-border)",
           padding: "16px 18px",
           marginBottom: 22,
-          boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
+          boxShadow: "0 2px 8px rgba(13,148,136,0.06)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <div style={{
-              width: 34, height: 34, borderRadius: 10, background: "#EEF4FF",
+              width: 34, height: 34, borderRadius: 10, background: "#ecfdf5",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <BellRing size={16} style={{ color: "#3B6FE8" }} />
+              <BellRing size={16} style={{ color: "#0d9488" }} />
             </div>
             <p style={{ color: "var(--app-fg)", fontSize: 16, fontWeight: 800, margin: 0 }}>
               Shared Records Alerts
@@ -686,7 +679,7 @@ export default function DoctorDashboard() {
           {[
             { label: "Pending",   count: groupedAppts.PENDING.length,   bg: "#FEF9C3", color: "#854D0E", border: "#FDE68A" },
             { label: "Confirmed", count: groupedAppts.CONFIRMED.length, bg: "#DCFCE7", color: "#166534", border: "#86EFAC" },
-            { label: "Completed", count: groupedAppts.COMPLETED.length, bg: "#EEF4FF", color: "#1e40af", border: "#C7D9FF" },
+            { label: "Completed", count: groupedAppts.COMPLETED.length, bg: "#ecfdf5", color: "#115e59", border: "#99f6e4" },
             { label: "Cancelled", count: groupedAppts.CANCELLED.length, bg: "#FEE2E2", color: "#991B1B", border: "#FECACA" },
           ].map(s => (
             <div key={s.label} style={{ background: s.bg, borderRadius: 20, padding: "20px 22px", border: `1.5px solid ${s.border}` }}>
@@ -699,11 +692,11 @@ export default function DoctorDashboard() {
         {/* Appointment list */}
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 80 }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", border: "4px solid #C7D9FF", borderTopColor: "#3B6FE8", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", border: "4px solid #99f6e4", borderTopColor: "#0d9488", animation: "spin 0.8s linear infinite" }} />
           </div>
         ) : appointments.length === 0 ? (
           <div style={{ textAlign: "center", paddingTop: 80 }}>
-            <Calendar size={52} style={{ color: "#C7D9FF", margin: "0 auto 16px" }} />
+            <Calendar size={52} style={{ color: "#99f6e4", margin: "0 auto 16px" }} />
             <p style={{ color: "var(--app-fg)", fontWeight: 800, fontSize: 20 }}>No appointments yet</p>
             <p style={{ color: "var(--app-muted)", fontSize: 16 }}>Patients will appear here once they book.</p>
           </div>
@@ -721,7 +714,7 @@ export default function DoctorDashboard() {
                     border: "1.5px solid var(--app-border)",
                     padding: "22px 28px",
                     display: "flex", alignItems: "center", gap: 20,
-                    boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
+                    boxShadow: "0 2px 8px rgba(13,148,136,0.06)",
                   }}
                 >
                   {/* Left colour strip */}
@@ -733,7 +726,7 @@ export default function DoctorDashboard() {
                       <Badge label={appt.status} {...st} />
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        background: "var(--app-surface-2)", color: "#3B6FE8",
+                        background: "var(--app-surface-2)", color: "#0d9488",
                         borderRadius: 99, padding: "3px 12px", fontSize: 12, fontWeight: 700,
                       }}>
                         {appt.consultation_type === "VIDEO" ? <><Video size={11} /> Video</> : <><Building2 size={11} /> In-Person</>}
@@ -780,7 +773,7 @@ export default function DoctorDashboard() {
                         <Trash2 size={18} />
                       </button>
                     )}
-                    <ChevronRight size={20} style={{ color: "#C7D9FF" }} />
+                    <ChevronRight size={20} style={{ color: "#99f6e4" }} />
                   </div>
                 </div>
               );

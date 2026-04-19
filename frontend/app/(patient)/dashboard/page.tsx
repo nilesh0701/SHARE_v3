@@ -4,6 +4,7 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareMark } from "@/components/branding/share-brand";
 import {
   BadgeCheck,
   Bell,
@@ -39,14 +40,14 @@ const quickActions = [
     desc: "View & manage upcoming visits",
     href: "/appointments",
     icon: Calendar,
-    bg: "#3B6FE8",
+    bg: "#0d9488",
   },
   {
     label: "Medical Records",
     desc: "Upload & share your files",
     href: "/records",
     icon: FileText,
-    bg: "#2563EB",
+    bg: "#0f766e",
   },
 ];
 
@@ -126,7 +127,7 @@ function FaqAccordionItem({
         aria-controls={contentId}
         className="w-full px-5 py-4 flex items-start gap-3 text-left"
       >
-        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#3B6FE8]" style={{ background: "var(--app-surface-2)" }}>
+        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-teal-600" style={{ background: "var(--app-surface-2)" }}>
           <Icon size={18} />
         </span>
         <span className="flex-1">
@@ -134,7 +135,7 @@ function FaqAccordionItem({
             {item.q}
           </span>
         </span>
-        <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[#3B6FE8]" style={{ background: "var(--app-surface-2)" }}>
+        <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-teal-600" style={{ background: "var(--app-surface-2)" }}>
           <ChevronDown
             size={18}
             className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"}`}
@@ -184,12 +185,12 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="min-h-screen share-animated-bg" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap');
         * { box-sizing: border-box; }
         .specialty-card { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
-        .specialty-card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(59,111,232,0.22) !important; background-color: #dcfce7 !important; }
+        .specialty-card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(13,148,136,0.22) !important; background-color: #dcfce7 !important; }
         .specialty-card:hover p { color: #14532d !important; }
         .specialty-card:hover > div { background: #bbf7d0 !important; }
         html[data-theme="dark"] .specialty-card:hover { background-color: #14532d !important; }
@@ -217,13 +218,12 @@ export default function PatientDashboard() {
               transition: "transform 0.38s cubic-bezier(0.34,1.56,0.64,1)",
             }}>
               <div style={{
-                width: 52, height: 52, background: "#3B6FE8", borderRadius: 16, flexShrink: 0,
-                boxShadow: logoHovered ? "0 6px 20px rgba(59,111,232,0.55)" : "0 4px 14px rgba(59,111,232,0.35)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+                flexShrink: 0,
+                transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), filter 0.3s ease",
                 transform: logoHovered ? "scale(1.08) rotate(-3deg)" : "scale(1) rotate(0deg)",
+                filter: logoHovered ? "drop-shadow(0 6px 14px rgba(13,148,136,0.45))" : "drop-shadow(0 4px 10px rgba(13,148,136,0.25))",
               }}>
-                <span style={{ color: "white", fontWeight: 900, fontSize: 24, letterSpacing: "-1px" }}>S</span>
+                <ShareMark size={52} />
               </div>
               <span style={{ fontWeight: 900, fontSize: 28, color: "var(--app-fg)", letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>
                 SHARE
@@ -232,7 +232,7 @@ export default function PatientDashboard() {
 
             {/* Full form — slides in from right after icon+SHARE move */}
             <span style={{
-              fontWeight: 600, fontSize: 14, color: "#3B6FE8",
+              fontWeight: 600, fontSize: 14, color: "var(--share-brand-accent)",
               whiteSpace: "nowrap", letterSpacing: "0.01em",
               marginLeft: 8,
               opacity: logoHovered ? 1 : 0,
@@ -255,7 +255,7 @@ export default function PatientDashboard() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                background: "#3B6FE8",
+                background: "#0d9488",
                 color: "white",
                 border: "none",
                 borderRadius: 99,
@@ -266,7 +266,7 @@ export default function PatientDashboard() {
                 transition: "background-color 0.2s ease",
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#16a34a"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#3B6FE8"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0d9488"; }}
             >
               <Plus size={14} /> New Appointment
             </button>
@@ -275,11 +275,11 @@ export default function PatientDashboard() {
               background: "var(--app-surface-2)", display: "flex", alignItems: "center",
               justifyContent: "center", cursor: "pointer",
             }}>
-              <Bell size={20} style={{ color: "#3B6FE8" }} />
+              <Bell size={20} style={{ color: "#0d9488" }} />
             </div>
             <div style={{
               width: 42, height: 42, borderRadius: "50%",
-              background: "linear-gradient(135deg,#3B6FE8,#6B99FF)",
+              background: "linear-gradient(135deg,#0d9488,#5eead4)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontWeight: 800, color: "white", fontSize: 18,
             }}>
@@ -305,17 +305,17 @@ export default function PatientDashboard() {
         {/* HERO */}
         <div style={{
           borderRadius: 28, padding: "44px 48px",
-          background: "linear-gradient(135deg,#3B6FE8 0%,#6B99FF 55%,#93C5FD 100%)",
+          background: "linear-gradient(135deg,#a7f3d0 0%,#2dd4bf 45%,#7dd3fc 100%)",
           position: "relative", overflow: "hidden",
         }}>
           <div style={{ position: "absolute", top: -40, right: -40, width: 220, height: 220, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
           <div style={{ position: "absolute", bottom: -50, right: 60, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 18, fontWeight: 600, marginBottom: 6 }}>Good day 👋</p>
-            <h1 style={{ color: "white", fontSize: 38, fontWeight: 900, letterSpacing: "-1px", margin: "0 0 8px" }}>
+            <p style={{ color: "rgba(15,23,42,0.55)", fontSize: 18, fontWeight: 600, marginBottom: 6 }}>Good day 👋</p>
+            <h1 style={{ color: "#0f172a", fontSize: 38, fontWeight: 900, letterSpacing: "-1px", margin: "0 0 8px" }}>
               Hello, {firstName}!
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 18, marginBottom: 28 }}>
+            <p style={{ color: "rgba(15,23,42,0.65)", fontSize: 18, marginBottom: 28 }}>
               How are you feeling today? Find a verified doctor near you.
             </p>
             <form onSubmit={handleSearch}>
@@ -324,7 +324,7 @@ export default function PatientDashboard() {
                 background: "var(--app-surface)", borderRadius: 18, padding: "12px 16px",
                 maxWidth: 500, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
               }}>
-                <Search size={20} style={{ color: "#3B6FE8", flexShrink: 0 }} />
+                <Search size={20} style={{ color: "#0d9488", flexShrink: 0 }} />
                 <input
                   type="text"
                   placeholder="Search doctor, specialty…"
@@ -336,10 +336,10 @@ export default function PatientDashboard() {
                   }}
                 />
                 <button type="submit" style={{
-                  background: "#3B6FE8", color: "white", border: "none",
+                  background: "#0d9488", color: "white", border: "none",
                   borderRadius: 12, padding: "10px 22px", fontWeight: 700,
                   fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                  boxShadow: "0 2px 8px rgba(59,111,232,0.35)",
+                  boxShadow: "0 2px 8px rgba(13,148,136,0.35)",
                 }}>
                   Search
                 </button>
@@ -356,7 +356,7 @@ export default function PatientDashboard() {
               style={{
                 background: a.bg, borderRadius: 24, padding: "28px 28px",
                 display: "flex", alignItems: "center", gap: 18,
-                textDecoration: "none", boxShadow: "0 4px 16px rgba(59,111,232,0.25)",
+                textDecoration: "none", boxShadow: "0 4px 16px rgba(13,148,136,0.25)",
               }}>
               <div style={{
                 width: 60, height: 60, borderRadius: 18, flexShrink: 0,
@@ -381,7 +381,7 @@ export default function PatientDashboard() {
               Top Searched Specialties
             </h2>
             <Link href="/search" style={{
-              color: "#3B6FE8", fontSize: 16, fontWeight: 700,
+              color: "#0d9488", fontSize: 16, fontWeight: 700,
               textDecoration: "none", display: "flex", alignItems: "center", gap: 4,
             }}>
               See all <ChevronRight size={17} />
@@ -399,7 +399,7 @@ export default function PatientDashboard() {
                   border: "1.5px solid var(--app-border)",
                   padding: "24px 16px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
-                  textDecoration: "none", boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
+                  textDecoration: "none", boxShadow: "0 2px 8px rgba(13,148,136,0.06)",
                 }}
               >
                 <div style={{
@@ -445,7 +445,7 @@ export default function PatientDashboard() {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm text-[#3B6FE8]"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm text-teal-600"
                 style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
               >
                 <HelpCircle size={20} />

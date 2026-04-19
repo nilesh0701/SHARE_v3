@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { jwtDecode } from "jwt-decode";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { ShareMark } from "@/components/branding/share-brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -38,16 +39,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center share-animated-bg">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-20 -left-16 h-56 w-56 rounded-full bg-indigo-300/30 blur-3xl" />
-        <div className="absolute bottom-6 right-0 h-64 w-64 rounded-full bg-sky-300/30 blur-3xl" />
+        <div className="absolute -top-20 -left-16 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl" />
+        <div className="absolute bottom-6 right-0 h-64 w-64 rounded-full bg-sky-200/40 blur-3xl" />
       </div>
 
       <div className="relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/60 p-8 w-full max-w-md">
-        <div className="text-center mb-7">
-          <h1 className="text-3xl font-black tracking-tight text-indigo-600">SHARE</h1>
-          <p className="text-gray-500 mt-2 text-sm">Welcome back. Sign in to continue.</p>
+        <div className="text-center mb-7 flex flex-col items-center gap-2">
+          <ShareMark size={72} priority className="drop-shadow-sm" />
+          <h1 className="text-3xl font-black tracking-tight text-teal-700 m-0">SHARE</h1>
+          <p className="text-gray-500 text-sm font-medium m-0">SHARE — Healthcare Platform</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

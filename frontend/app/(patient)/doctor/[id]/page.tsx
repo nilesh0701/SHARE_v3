@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Clock, LogOut, ChevronLeft, Video, Building2, CheckCircle, CalendarCheck, CreditCard, Banknote } from "lucide-react";
 import ThemeToggle from "@/components/theme/theme-toggle";
+import { ShareMark } from "@/components/branding/share-brand";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -97,19 +98,19 @@ export default function DoctorProfilePage() {
   };
 
   if (!doctor) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--app-bg)" }}>
+    <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-        <p style={{ color: "#3B6FE8", fontFamily: "'DM Sans', sans-serif" }}>Loading doctor profile…</p>
+        <div className="w-10 h-10 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
+        <p style={{ color: "#0d9488", fontFamily: "'DM Sans', sans-serif" }}>Loading doctor profile…</p>
       </div>
     </div>
   );
 
   if (success) return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--app-bg)" }}>
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="rounded-3xl shadow-xl p-10 max-w-md w-full text-center" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "var(--app-surface-2)" }}>
-          <CheckCircle size={40} style={{ color: "#3B6FE8" }} />
+          <CheckCircle size={40} style={{ color: "#0d9488" }} />
         </div>
         <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'DM Sans', sans-serif", color: "var(--app-fg)" }}>
           Booking Requested!
@@ -124,22 +125,22 @@ export default function DoctorProfilePage() {
         )}
         {meetingLink && (
           <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}>
-            <p className="text-sm font-semibold mb-1" style={{ color: "#3B6FE8" }}>Video Meeting Link</p>
+            <p className="text-sm font-semibold mb-1" style={{ color: "#0d9488" }}>Video Meeting Link</p>
             <a href={meetingLink} target="_blank" rel="noreferrer"
-              className="text-sm break-all underline" style={{ color: "#2563EB" }}>{meetingLink}</a>
+              className="text-sm break-all underline" style={{ color: "#0f766e" }}>{meetingLink}</a>
           </div>
         )}
         <div className="flex flex-col gap-3 mt-6">
           {!booking.pay_later && (
             <Link href="/payment"
               className="w-full py-3 rounded-2xl font-semibold text-white text-center transition"
-              style={{ background: "#3B6FE8" }}>
+              style={{ background: "#0d9488" }}>
               Proceed to Payment
             </Link>
           )}
           <Link href="/appointments"
             className="w-full py-3 rounded-2xl font-semibold text-center transition"
-            style={{ background: "var(--app-surface-2)", color: "#3B6FE8" }}>
+            style={{ background: "var(--app-surface-2)", color: "#0d9488" }}>
             View My Appointments
           </Link>
         </div>
@@ -150,16 +151,22 @@ export default function DoctorProfilePage() {
   const isInPerson = booking.consultation_type === "IN_PERSON";
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--app-bg)", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Import DM Sans */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
       {/* Nav */}
       <nav className="shadow-sm sticky top-0 z-10" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/search" className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70" style={{ color: "#3B6FE8" }}>
-            <ChevronLeft size={18} /> Back to Search
-          </Link>
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <ShareMark size={34} />
+              <span className="font-black text-base tracking-tight" style={{ color: "var(--app-fg)" }}>SHARE</span>
+            </div>
+            <Link href="/search" className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70" style={{ color: "#0d9488" }}>
+              <ChevronLeft size={18} /> Back to Search
+            </Link>
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <ThemeToggle size="sm" />
             <button onClick={logout} className="flex items-center gap-1 text-sm font-medium transition hover:opacity-70" style={{ color: "var(--app-danger)" }}>
@@ -176,17 +183,17 @@ export default function DoctorProfilePage() {
           <div className="flex items-start gap-6">
             {/* Avatar placeholder */}
             <div className="w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0 text-3xl font-bold"
-              style={{ background: "linear-gradient(135deg, #3B6FE8 0%, #6B99FF 100%)", color: "white" }}>
+              style={{ background: "linear-gradient(135deg, #0d9488 0%, #5eead4 100%)", color: "white" }}>
               {doctor.full_name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold" style={{ color: "var(--app-fg)" }}>Dr. {doctor.full_name}</h1>
-              <p className="font-semibold mt-0.5" style={{ color: "#3B6FE8" }}>{doctor.specialty}</p>
+              <p className="font-semibold mt-0.5" style={{ color: "#0d9488" }}>{doctor.specialty}</p>
               <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--app-muted)" }}>{doctor.bio}</p>
               <div className="flex flex-wrap gap-2 mt-4 items-center">
                 <span className="text-xl font-bold" style={{ color: "#16A34A" }}>₹{doctor.consultation_fee}</span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-                  style={{ background: "var(--app-surface-2)", color: "#3B6FE8", border: "1px solid var(--app-border)" }}>
+                  style={{ background: "var(--app-surface-2)", color: "#0d9488", border: "1px solid var(--app-border)" }}>
                   {doctor.consultation_type === "VIDEO" ? <><Video size={12} /> Video</> :
                    doctor.consultation_type === "IN_PERSON" ? <><Building2 size={12} /> In-Person</> :
                    <><Video size={12} /> Video &amp; In-Person</>}
@@ -212,7 +219,7 @@ export default function DoctorProfilePage() {
         {availability.length > 0 && (
           <div className="rounded-3xl p-6 shadow-sm" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
             <h3 className="font-bold text-base mb-4 flex items-center gap-2" style={{ color: "var(--app-fg)" }}>
-              <Clock size={17} style={{ color: "#3B6FE8" }} /> Available Slots
+              <Clock size={17} style={{ color: "#0d9488" }} /> Available Slots
               <span className="text-xs font-normal ml-1" style={{ color: "var(--app-muted)" }}>— click to auto-fill date &amp; time</span>
             </h3>
             <div className="flex flex-wrap gap-3">
@@ -225,9 +232,9 @@ export default function DoctorProfilePage() {
                     onClick={() => handleSlotClick(slot)}
                     className="flex flex-col items-center px-4 py-3 rounded-2xl text-sm font-semibold transition-all"
                     style={{
-                      background: isSelected ? "#3B6FE8" : "var(--app-surface-2)",
-                      color: isSelected ? "white" : "#3B6FE8",
-                      border: `2px solid ${isSelected ? "#3B6FE8" : "var(--app-border)"}`,
+                      background: isSelected ? "#0d9488" : "var(--app-surface-2)",
+                      color: isSelected ? "white" : "#0d9488",
+                      border: `2px solid ${isSelected ? "#0d9488" : "var(--app-border)"}`,
                       transform: isSelected ? "scale(1.05)" : "scale(1)",
                       boxShadow: isSelected ? "0 4px 14px rgba(59,111,232,0.3)" : "none",
                     }}
@@ -309,9 +316,9 @@ export default function DoctorProfilePage() {
                     onClick={() => setBooking(b => ({ ...b, pay_later: false }))}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition"
                     style={{
-                      background: !booking.pay_later ? "#3B6FE8" : "white",
+                      background: !booking.pay_later ? "#0d9488" : "white",
                       color: !booking.pay_later ? "white" : "#6B7280",
-                      border: `2px solid ${!booking.pay_later ? "#3B6FE8" : "#D1D5DB"}`,
+                      border: `2px solid ${!booking.pay_later ? "#0d9488" : "#D1D5DB"}`,
                     }}
                   >
                     <CreditCard size={15} /> Pay Now
@@ -362,7 +369,7 @@ export default function DoctorProfilePage() {
               type="submit"
               disabled={loading}
               className="w-full py-3.5 rounded-2xl font-bold text-white text-sm transition disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #3B6FE8 0%, #6B99FF 100%)", boxShadow: "0 4px 14px rgba(59,111,232,0.35)" }}
+              style={{ background: "linear-gradient(135deg, #0d9488 0%, #5eead4 100%)", boxShadow: "0 4px 14px rgba(13,148,136,0.35)" }}
             >
               {loading ? "Booking…" : `Book for ₹${doctor.consultation_fee}${booking.pay_later ? " (Pay at Clinic)" : ""}`}
             </button>

@@ -3,6 +3,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import Link from "next/link";
+import { ShareMark } from "@/components/branding/share-brand";
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -61,7 +62,7 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Registration Submitted</h2>
@@ -75,11 +76,12 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
+    <div className="min-h-screen flex items-center justify-center py-10 px-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-indigo-600">SHARE</h1>
-          <p className="text-gray-500 mt-1">
+        <div className="text-center mb-6 flex flex-col items-center gap-2">
+          <ShareMark size={56} priority />
+          <h1 className="text-3xl font-bold tracking-tight text-teal-700 m-0">SHARE</h1>
+          <p className="text-gray-500 mt-1 m-0">
             Register as {role === "patient" ? "Patient" : "Doctor"}
           </p>
         </div>
