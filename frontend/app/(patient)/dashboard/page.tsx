@@ -3,6 +3,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme/theme-toggle";
 import {
   BadgeCheck,
   Bell,
@@ -12,6 +13,7 @@ import {
   HelpCircle,
   KeyRound,
   LogOut,
+  Plus,
   Search,
   Share2,
   ShieldCheck,
@@ -116,7 +118,7 @@ function FaqAccordionItem({
   const Icon = item.icon;
 
   return (
-    <div className="rounded-2xl border border-[#C7D9FF] bg-white shadow-sm">
+    <div className="rounded-2xl border shadow-sm" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
       <button
         type="button"
         onClick={onToggle}
@@ -124,15 +126,15 @@ function FaqAccordionItem({
         aria-controls={contentId}
         className="w-full px-5 py-4 flex items-start gap-3 text-left"
       >
-        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EEF4FF] text-[#3B6FE8]">
+        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#3B6FE8]" style={{ background: "var(--app-surface-2)" }}>
           <Icon size={18} />
         </span>
         <span className="flex-1">
-          <span className="block text-[15px] sm:text-[16px] font-extrabold text-[#1a1a2e] leading-snug">
+          <span className="block text-[15px] sm:text-[16px] font-extrabold leading-snug" style={{ color: "var(--app-fg)" }}>
             {item.q}
           </span>
         </span>
-        <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#EEF4FF] text-[#3B6FE8]">
+        <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[#3B6FE8]" style={{ background: "var(--app-surface-2)" }}>
           <ChevronDown
             size={18}
             className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"}`}
@@ -146,7 +148,7 @@ function FaqAccordionItem({
         className="overflow-hidden transition-[max-height] duration-300 ease-out"
       >
         <div ref={panelRef} className="px-5 pb-5 -mt-1">
-          <p className="text-[14px] sm:text-[15px] text-[#6b7280] leading-relaxed">
+          <p className="text-[14px] sm:text-[15px] leading-relaxed" style={{ color: "var(--app-muted)" }}>
             {item.a}
           </p>
         </div>
@@ -182,19 +184,24 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#EEF4FF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen share-animated-bg" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap');
         * { box-sizing: border-box; }
-        .specialty-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .specialty-card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(59,111,232,0.22) !important; }
-        .quick-card { transition: transform 0.18s ease, opacity 0.18s ease; }
-        .quick-card:hover { opacity: 0.91; transform: translateY(-4px); }
+        .specialty-card { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
+        .specialty-card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(59,111,232,0.22) !important; background-color: #dcfce7 !important; }
+        .specialty-card:hover p { color: #14532d !important; }
+        .specialty-card:hover > div { background: #bbf7d0 !important; }
+        html[data-theme="dark"] .specialty-card:hover { background-color: #14532d !important; }
+        html[data-theme="dark"] .specialty-card:hover p { color: #ecfdf5 !important; }
+        html[data-theme="dark"] .specialty-card:hover > div { background: #166534 !important; }
+        .quick-card { transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.2s ease; }
+        .quick-card:hover { opacity: 0.95; transform: translateY(-4px); background-color: #16a34a !important; }
         input:focus, select:focus, textarea:focus { outline: none; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav className="bg-white sticky top-0 z-20" style={{ borderBottom: "1px solid #C7D9FF" }}>
+      <nav className="sticky top-0 z-20" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
         <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
 
           {/* ── ANIMATED LOGO ── */}
@@ -218,7 +225,7 @@ export default function PatientDashboard() {
               }}>
                 <span style={{ color: "white", fontWeight: 900, fontSize: 24, letterSpacing: "-1px" }}>S</span>
               </div>
-              <span style={{ fontWeight: 900, fontSize: 28, color: "#1a1a2e", letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>
+              <span style={{ fontWeight: 900, fontSize: 28, color: "var(--app-fg)", letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>
                 SHARE
               </span>
             </div>
@@ -241,9 +248,31 @@ export default function PatientDashboard() {
 
           {/* Right actions */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              type="button"
+              onClick={() => router.push("/search")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: "#3B6FE8",
+                color: "white",
+                border: "none",
+                borderRadius: 99,
+                padding: "10px 16px",
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: "pointer",
+                transition: "background-color 0.2s ease",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#16a34a"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#3B6FE8"; }}
+            >
+              <Plus size={14} /> New Appointment
+            </button>
             <div style={{
               width: 42, height: 42, borderRadius: "50%",
-              background: "#EEF4FF", display: "flex", alignItems: "center",
+              background: "var(--app-surface-2)", display: "flex", alignItems: "center",
               justifyContent: "center", cursor: "pointer",
             }}>
               <Bell size={20} style={{ color: "#3B6FE8" }} />
@@ -256,9 +285,10 @@ export default function PatientDashboard() {
             }}>
               {firstName.charAt(0).toUpperCase()}
             </div>
+            <ThemeToggle />
             <button onClick={logout} style={{
               display: "flex", alignItems: "center", gap: 6,
-              background: "#FEF2F2", color: "#EF4444",
+              background: "var(--app-danger-surface)", color: "var(--app-danger)",
               border: "none", borderRadius: 99, padding: "10px 18px",
               fontWeight: 700, fontSize: 15, cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif",
@@ -291,7 +321,7 @@ export default function PatientDashboard() {
             <form onSubmit={handleSearch}>
               <div style={{
                 display: "flex", alignItems: "center", gap: 10,
-                background: "white", borderRadius: 18, padding: "12px 16px",
+                background: "var(--app-surface)", borderRadius: 18, padding: "12px 16px",
                 maxWidth: 500, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
               }}>
                 <Search size={20} style={{ color: "#3B6FE8", flexShrink: 0 }} />
@@ -302,7 +332,7 @@ export default function PatientDashboard() {
                   onChange={e => setSearchQuery(e.target.value)}
                   style={{
                     flex: 1, border: "none", background: "transparent",
-                    color: "#1a1a2e", fontSize: 17, fontFamily: "'DM Sans', sans-serif",
+                    color: "var(--app-fg)", fontSize: 17, fontFamily: "'DM Sans', sans-serif",
                   }}
                 />
                 <button type="submit" style={{
@@ -347,7 +377,7 @@ export default function PatientDashboard() {
         {/* SPECIALTIES */}
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-            <h2 style={{ color: "#1a1a2e", fontSize: 24, fontWeight: 900, margin: 0 }}>
+            <h2 style={{ color: "var(--app-fg)", fontSize: 24, fontWeight: 900, margin: 0 }}>
               Top Searched Specialties
             </h2>
             <Link href="/search" style={{
@@ -365,8 +395,8 @@ export default function PatientDashboard() {
                 href={`/search?specialty=${encodeURIComponent(sp.query)}`}
                 className="specialty-card"
                 style={{
-                  background: "white", borderRadius: 24,
-                  border: "1.5px solid #C7D9FF",
+                  background: "var(--app-surface)", borderRadius: 24,
+                  border: "1.5px solid var(--app-border)",
                   padding: "24px 16px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
                   textDecoration: "none", boxShadow: "0 2px 8px rgba(59,111,232,0.06)",
@@ -374,13 +404,13 @@ export default function PatientDashboard() {
               >
                 <div style={{
                   width: 80, height: 80, borderRadius: "50%",
-                  background: "#EEF4FF",
+                  background: "var(--app-surface-2)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 38,
                 }}>
                   {sp.icon}
                 </div>
-                <p style={{ color: "#1a1a2e", fontWeight: 800, fontSize: 17, textAlign: "center", margin: 0, lineHeight: 1.3 }}>
+                <p style={{ color: "var(--app-fg)", fontWeight: 800, fontSize: 17, textAlign: "center", margin: 0, lineHeight: 1.3 }}>
                   {sp.name}
                 </p>
               </Link>
@@ -390,21 +420,21 @@ export default function PatientDashboard() {
 
         {/* HEALTH TIP */}
         <div style={{
-          background: "white", borderRadius: 24,
-          border: "1.5px solid #C7D9FF",
+          background: "var(--app-surface)", borderRadius: 24,
+          border: "1.5px solid var(--app-border)",
           padding: "24px 28px",
           display: "flex", alignItems: "center", gap: 20,
         }}>
           <div style={{
             width: 60, height: 60, borderRadius: 18, flexShrink: 0,
-            background: "#EEF4FF", display: "flex", alignItems: "center",
+            background: "var(--app-surface-2)", display: "flex", alignItems: "center",
             justifyContent: "center", fontSize: 32,
           }}>
             💡
           </div>
           <div>
-            <p style={{ color: "#1a1a2e", fontWeight: 800, fontSize: 18, margin: "0 0 5px" }}>Health Tip of the Day</p>
-            <p style={{ color: "#6b7280", fontSize: 16, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ color: "var(--app-fg)", fontWeight: 800, fontSize: 18, margin: "0 0 5px" }}>Health Tip of the Day</p>
+            <p style={{ color: "var(--app-muted)", fontSize: 16, margin: 0, lineHeight: 1.5 }}>
               Drink at least 8 glasses of water daily and get 7–8 hours of sleep for optimal health.
             </p>
           </div>
@@ -414,14 +444,17 @@ export default function PatientDashboard() {
         <section className="w-full">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm border border-[#C7D9FF] text-[#3B6FE8]">
+              <span
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm text-[#3B6FE8]"
+                style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
+              >
                 <HelpCircle size={20} />
               </span>
               <div>
-                <h3 className="text-[18px] sm:text-[20px] font-extrabold text-[#1a1a2e] leading-tight m-0">
+                <h3 className="text-[18px] sm:text-[20px] font-extrabold leading-tight m-0" style={{ color: "var(--app-fg)" }}>
                   Frequently Asked Questions
                 </h3>
-                <p className="text-[13px] sm:text-[14px] text-[#6b7280] m-0">
+                <p className="text-[13px] sm:text-[14px] m-0" style={{ color: "var(--app-muted)" }}>
                   Quick answers about records, sharing, and appointments.
                 </p>
               </div>

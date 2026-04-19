@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type SecurePDFViewerProps = {
   streamUrl: string;
@@ -8,24 +8,31 @@ type SecurePDFViewerProps = {
 };
 
 export default function SecurePDFViewer({ streamUrl, className }: SecurePDFViewerProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
     const blockShortcuts = (event: KeyboardEvent) => {
       if (!event.ctrlKey) return;
       const key = event.key.toLowerCase();
-      if (key === "s" || key === "p" || key === "u") {
+      if (key === "s" || key === "p") {
         event.preventDefault();
         event.stopPropagation();
       }
     };
 
-    window.addEventListener("keydown", blockShortcuts);
-    return () => window.removeEventListener("keydown", blockShortcuts);
+    node.addEventListener("keydown", blockShortcuts);
+    return () => node.removeEventListener("keydown", blockShortcuts);
   }, []);
 
   return (
     <div
+      ref={containerRef}
       onContextMenu={(e) => e.preventDefault()}
-      className={`select-none ${className ?? ""}`}
+      className={`select-none outline-none ${className ?? ""}`}
+      tabIndex={0}
     >
       <style>{`
         @media print {

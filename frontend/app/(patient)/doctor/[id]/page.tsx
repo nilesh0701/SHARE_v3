@@ -5,6 +5,7 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Clock, LogOut, ChevronLeft, Video, Building2, CheckCircle, CalendarCheck, CreditCard, Banknote } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -96,7 +97,7 @@ export default function DoctorProfilePage() {
   };
 
   if (!doctor) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#EEF4FF" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--app-bg)" }}>
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
         <p style={{ color: "#3B6FE8", fontFamily: "'DM Sans', sans-serif" }}>Loading doctor profile…</p>
@@ -105,15 +106,15 @@ export default function DoctorProfilePage() {
   );
 
   if (success) return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#EEF4FF" }}>
-      <div className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center" style={{ border: "1px solid #C7D9FF" }}>
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "#EEF4FF" }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--app-bg)" }}>
+      <div className="rounded-3xl shadow-xl p-10 max-w-md w-full text-center" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "var(--app-surface-2)" }}>
           <CheckCircle size={40} style={{ color: "#3B6FE8" }} />
         </div>
-        <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'DM Sans', sans-serif", color: "#1a1a2e" }}>
+        <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'DM Sans', sans-serif", color: "var(--app-fg)" }}>
           Booking Requested!
         </h2>
-        <p className="mb-2" style={{ color: "#6b7280" }}>
+        <p className="mb-2" style={{ color: "var(--app-muted)" }}>
           Your appointment with <strong>Dr. {doctor.full_name}</strong> has been sent.
         </p>
         {booking.pay_later && (
@@ -122,7 +123,7 @@ export default function DoctorProfilePage() {
           </div>
         )}
         {meetingLink && (
-          <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: "#EEF4FF", border: "1px solid #C7D9FF" }}>
+          <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}>
             <p className="text-sm font-semibold mb-1" style={{ color: "#3B6FE8" }}>Video Meeting Link</p>
             <a href={meetingLink} target="_blank" rel="noreferrer"
               className="text-sm break-all underline" style={{ color: "#2563EB" }}>{meetingLink}</a>
@@ -138,7 +139,7 @@ export default function DoctorProfilePage() {
           )}
           <Link href="/appointments"
             className="w-full py-3 rounded-2xl font-semibold text-center transition"
-            style={{ background: "#EEF4FF", color: "#3B6FE8" }}>
+            style={{ background: "var(--app-surface-2)", color: "#3B6FE8" }}>
             View My Appointments
           </Link>
         </div>
@@ -149,26 +150,29 @@ export default function DoctorProfilePage() {
   const isInPerson = booking.consultation_type === "IN_PERSON";
 
   return (
-    <div className="min-h-screen" style={{ background: "#EEF4FF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "var(--app-bg)", fontFamily: "'DM Sans', sans-serif" }}>
       {/* Import DM Sans */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
       {/* Nav */}
-      <nav className="bg-white shadow-sm sticky top-0 z-10" style={{ borderBottom: "1px solid #C7D9FF" }}>
+      <nav className="shadow-sm sticky top-0 z-10" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/search" className="flex items-center gap-2 text-sm font-medium transition hover:opacity-70" style={{ color: "#3B6FE8" }}>
             <ChevronLeft size={18} /> Back to Search
           </Link>
-          <button onClick={logout} className="flex items-center gap-1 text-sm font-medium transition hover:opacity-70" style={{ color: "#EF4444" }}>
-            <LogOut size={16} /> Logout
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <ThemeToggle size="sm" />
+            <button onClick={logout} className="flex items-center gap-1 text-sm font-medium transition hover:opacity-70" style={{ color: "var(--app-danger)" }}>
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-5">
 
         {/* Doctor Card */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm" style={{ border: "1px solid #C7D9FF" }}>
+        <div className="rounded-3xl p-8 shadow-sm" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
           <div className="flex items-start gap-6">
             {/* Avatar placeholder */}
             <div className="w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0 text-3xl font-bold"
@@ -176,26 +180,26 @@ export default function DoctorProfilePage() {
               {doctor.full_name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold" style={{ color: "#1a1a2e" }}>Dr. {doctor.full_name}</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "var(--app-fg)" }}>Dr. {doctor.full_name}</h1>
               <p className="font-semibold mt-0.5" style={{ color: "#3B6FE8" }}>{doctor.specialty}</p>
-              <p className="text-sm mt-2 leading-relaxed" style={{ color: "#6b7280" }}>{doctor.bio}</p>
+              <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--app-muted)" }}>{doctor.bio}</p>
               <div className="flex flex-wrap gap-2 mt-4 items-center">
                 <span className="text-xl font-bold" style={{ color: "#16A34A" }}>₹{doctor.consultation_fee}</span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-                  style={{ background: "#EEF4FF", color: "#3B6FE8", border: "1px solid #C7D9FF" }}>
+                  style={{ background: "var(--app-surface-2)", color: "#3B6FE8", border: "1px solid var(--app-border)" }}>
                   {doctor.consultation_type === "VIDEO" ? <><Video size={12} /> Video</> :
                    doctor.consultation_type === "IN_PERSON" ? <><Building2 size={12} /> In-Person</> :
                    <><Video size={12} /> Video &amp; In-Person</>}
                 </span>
                 {doctor.gender && (
                   <span className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{ background: "#F3F4F6", color: "#374151" }}>
+                    style={{ background: "var(--app-surface-2)", color: "var(--app-muted)" }}>
                     {doctor.gender}
                   </span>
                 )}
               </div>
               {doctor.clinic_address && (
-                <div className="flex items-center gap-2 mt-3" style={{ color: "#6b7280" }}>
+                <div className="flex items-center gap-2 mt-3" style={{ color: "var(--app-muted)" }}>
                   <MapPin size={14} />
                   <span className="text-sm">{doctor.clinic_address}</span>
                 </div>
@@ -206,10 +210,10 @@ export default function DoctorProfilePage() {
 
         {/* Available Slots */}
         {availability.length > 0 && (
-          <div className="bg-white rounded-3xl p-6 shadow-sm" style={{ border: "1px solid #C7D9FF" }}>
-            <h3 className="font-bold text-base mb-4 flex items-center gap-2" style={{ color: "#1a1a2e" }}>
+          <div className="rounded-3xl p-6 shadow-sm" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
+            <h3 className="font-bold text-base mb-4 flex items-center gap-2" style={{ color: "var(--app-fg)" }}>
               <Clock size={17} style={{ color: "#3B6FE8" }} /> Available Slots
-              <span className="text-xs font-normal ml-1" style={{ color: "#9CA3AF" }}>— click to auto-fill date &amp; time</span>
+              <span className="text-xs font-normal ml-1" style={{ color: "var(--app-muted)" }}>— click to auto-fill date &amp; time</span>
             </h3>
             <div className="flex flex-wrap gap-3">
               {availability.map((slot: any) => {
@@ -221,9 +225,9 @@ export default function DoctorProfilePage() {
                     onClick={() => handleSlotClick(slot)}
                     className="flex flex-col items-center px-4 py-3 rounded-2xl text-sm font-semibold transition-all"
                     style={{
-                      background: isSelected ? "#3B6FE8" : "#EEF4FF",
+                      background: isSelected ? "#3B6FE8" : "var(--app-surface-2)",
                       color: isSelected ? "white" : "#3B6FE8",
-                      border: `2px solid ${isSelected ? "#3B6FE8" : "#C7D9FF"}`,
+                      border: `2px solid ${isSelected ? "#3B6FE8" : "var(--app-border)"}`,
                       transform: isSelected ? "scale(1.05)" : "scale(1)",
                       boxShadow: isSelected ? "0 4px 14px rgba(59,111,232,0.3)" : "none",
                     }}
@@ -245,15 +249,15 @@ export default function DoctorProfilePage() {
         )}
 
         {/* Booking Form */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm" style={{ border: "1px solid #C7D9FF" }}>
-          <h3 className="font-bold text-base mb-5" style={{ color: "#1a1a2e" }}>
+        <div className="rounded-3xl p-6 shadow-sm" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
+          <h3 className="font-bold text-base mb-5" style={{ color: "var(--app-fg)" }}>
             Book Appointment
           </h3>
           <form onSubmit={handleBook} className="space-y-4">
 
             {/* Date & Time */}
             <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: "#374151" }}>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--app-muted)" }}>
                 Date &amp; Time
               </label>
               <input
@@ -266,23 +270,23 @@ export default function DoctorProfilePage() {
                 required
                 className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
                 style={{
-                  border: "2px solid #C7D9FF",
-                  background: booking.scheduled_at ? "#EEF4FF" : "white",
-                  color: "#1a1a2e",
+                  border: "2px solid var(--app-border)",
+                  background: booking.scheduled_at ? "var(--app-surface-2)" : "var(--app-surface)",
+                  color: "var(--app-fg)",
                 }}
               />
             </div>
 
             {/* Consultation Type */}
             <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: "#374151" }}>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--app-muted)" }}>
                 Consultation Type
               </label>
               <select
                 value={booking.consultation_type}
                 onChange={(e) => setBooking({ ...booking, consultation_type: e.target.value, pay_later: false })}
                 className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
-                style={{ border: "2px solid #C7D9FF", color: "#1a1a2e" }}
+                style={{ border: "2px solid var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
               >
                 {(doctor.consultation_type === "VIDEO" || doctor.consultation_type === "BOTH") && (
                   <option value="VIDEO">🎥 Video Call</option>
@@ -335,8 +339,8 @@ export default function DoctorProfilePage() {
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: "#374151" }}>
-                Notes <span className="font-normal" style={{ color: "#9CA3AF" }}>(optional)</span>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--app-muted)" }}>
+                Notes <span className="font-normal" style={{ color: "var(--app-muted)" }}>(optional)</span>
               </label>
               <textarea
                 value={booking.notes}
@@ -344,12 +348,12 @@ export default function DoctorProfilePage() {
                 onChange={(e) => setBooking({ ...booking, notes: e.target.value })}
                 rows={3}
                 className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition resize-none"
-                style={{ border: "2px solid #C7D9FF", color: "#1a1a2e" }}
+                style={{ border: "2px solid var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)" }}
               />
             </div>
 
             {error && (
-              <div className="rounded-2xl px-4 py-3 text-sm" style={{ background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626" }}>
+              <div className="rounded-2xl px-4 py-3 text-sm" style={{ background: "var(--app-danger-surface)", border: "1px solid var(--app-border)", color: "var(--app-danger)" }}>
                 {error}
               </div>
             )}

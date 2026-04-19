@@ -39,7 +39,7 @@ Doctors get verified before going live. Admins manage verifications.
 
 ## Project Structure
 ```
-medshare/
+share/
 ├── start.sh                    ← Start everything with one command
 ├── backend/
 │   ├── .env                    ← Environment variables (create from .env.example)
@@ -99,8 +99,8 @@ Install these before starting:
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/medshare.git
-cd /d/medshare
+git clone https://github.com/YOUR_USERNAME/share.git
+cd /d/share
 ```
 
 ### 2. Create backend environment file
@@ -111,10 +111,10 @@ DATABASE_URL=postgresql://neondb_owner:npg_YeUCqAh1uK2x@ep-divine-hall-a1rhub5f-
 CLOUDINARY_CLOUD_NAME=dkekh1pwd
 CLOUDINARY_API_KEY=114781595295742
 CLOUDINARY_API_SECRET=ask_project_owner_for_this
-JWT_SECRET=medshare_super_secret_key_change_in_prod
+JWT_SECRET=share_super_secret_key_change_in_prod
 JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=120
-ADMIN_EMAIL=admin@medshare.com
+ADMIN_EMAIL=admin@share.com
 ADMIN_PASSWORD=admin123
 ```
 
@@ -122,7 +122,7 @@ ADMIN_PASSWORD=admin123
 
 ### 3. Install backend dependencies
 ```bash
-cd /d/medshare/backend
+cd /d/share/backend
 python -m venv venv
 source venv/Scripts/activate
 pip install -r requirements.txt
@@ -130,13 +130,13 @@ pip install -r requirements.txt
 
 ### 4. Install frontend dependencies
 ```bash
-cd /d/medshare/frontend
+cd /d/share/frontend
 npm install
 ```
 
 ### 5. Make start script executable
 ```bash
-chmod +x /d/medshare/start.sh
+chmod +x /d/share/start.sh
 ```
 
 ---
@@ -145,7 +145,7 @@ chmod +x /d/medshare/start.sh
 
 From the project root, one command starts everything:
 ```bash
-cd /d/medshare
+cd /d/share
 ./start.sh
 ```
 
@@ -163,7 +163,7 @@ Press `Ctrl+C` to stop everything.
 
 ### Admin
 ```
-Email:    admin@medshare.com
+Email:    admin@share.com
 Password: admin123
 ```
 
@@ -276,8 +276,8 @@ No local database setup needed. Tables are already created.
 ## File Storage
 
 Files stored on [Cloudinary](https://cloudinary.com) — free tier (25GB).
-Medical files go to `medshare/patients/{patient_id}/`
-Doctor certificates go to `medshare/certificates/`
+Medical files go to `share/patients/{patient_id}/`
+Doctor certificates go to `share/certificates/`
 
 ---
 

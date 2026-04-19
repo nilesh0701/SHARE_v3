@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
 :root {
+  /* Base tokens (used by Tailwind v4 theme mapping below) */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* App tokens (used across pages via var(...)) */
+  --app-bg: #eef4ff;
+  --app-fg: #1a1a2e;
+  --app-muted: #6b7280;
+  --app-surface: #ffffff;
+  --app-surface-2: #f9fafb;
+  --app-border: #c7d9ff;
+  --app-primary: #3b6fe8;
+  --app-primary-2: #6b99ff;
+  --app-danger: #ef4444;
+  --app-danger-surface: #fef2f2;
 }
 
 @theme inline {
@@ -12,17 +25,77 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #070a12;
+  --foreground: #e5e7eb;
+
+  --app-bg: #070b18;
+  --app-fg: #e5e7eb;
+  --app-muted: #a3aab8;
+  --app-surface: #0f172a;
+  --app-surface-2: #111827;
+  --app-border: #243244;
+  --app-primary: #7aa2ff;
+  --app-primary-2: #3b6fe8;
+  --app-danger: #fb7185;
+  --app-danger-surface: rgba(251, 113, 133, 0.14);
+}
+
+/* Tailwind utility overrides for dark mode (many pages hardcode light utilities) */
+html[data-theme="dark"] .bg-white {
+  background-color: var(--app-surface) !important;
+}
+
+html[data-theme="dark"] .bg-gray-50 {
+  background-color: var(--app-bg) !important;
+}
+
+html[data-theme="dark"] .bg-gray-100 {
+  background-color: var(--app-surface-2) !important;
+}
+
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 {
+  color: var(--app-fg) !important;
+}
+
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400 {
+  color: var(--app-muted) !important;
+}
+
+html[data-theme="dark"] .border,
+html[data-theme="dark"] .border-b {
+  border-color: var(--app-border) !important;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes shareBgShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.share-animated-bg {
+  background: linear-gradient(120deg, #eaf1ff, #dfe9ff, #edf7ff);
+  background-size: 220% 220%;
+  animation: shareBgShift 24s ease-in-out infinite;
+}
+
+html[data-theme="dark"] .share-animated-bg {
+  background: linear-gradient(120deg, #071225, #0c1a33, #0a1630);
+  background-size: 220% 220%;
 }
 
 ::placeholder {
@@ -39,5 +112,5 @@ textarea::placeholder {
 input,
 textarea,
 select {
-  color: #111827;
+  color: var(--app-fg);
 }

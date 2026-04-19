@@ -4,6 +4,7 @@ import api from "@/lib/axios";
 import { getUser, getStoredToken, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, LogOut, Users, Calendar, FileText, Clock } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
 
 export default function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
@@ -93,18 +94,21 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
+      <nav className="shadow-sm border-b" style={{ background: "var(--app-surface)", borderColor: "var(--app-border)" }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-indigo-600">SHARE — Admin</h1>
-          <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
-            <LogOut size={16} /> Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <button onClick={logout} className="flex items-center gap-1 text-sm" style={{ color: "var(--app-danger)" }}>
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-8">Admin Dashboard</h2>
+        <h2 className="text-2xl font-bold mb-8" style={{ color: "var(--app-fg)" }}>Admin Dashboard</h2>
 
         {/* Stats */}
         {reports && (

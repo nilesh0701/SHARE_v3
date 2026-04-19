@@ -5,12 +5,14 @@ import { setUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { jwtDecode } from "jwt-decode";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,50 +38,74 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-indigo-600">SHARE</h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center share-animated-bg">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-20 -left-16 h-56 w-56 rounded-full bg-indigo-300/30 blur-3xl" />
+        <div className="absolute bottom-6 right-0 h-64 w-64 rounded-full bg-sky-300/30 blur-3xl" />
+      </div>
+
+      <div className="relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/60 p-8 w-full max-w-md">
+        <div className="text-center mb-7">
+          <h1 className="text-3xl font-black tracking-tight text-indigo-600">SHARE</h1>
+          <p className="text-gray-500 mt-2 text-sm">Welcome back. Sign in to continue.</p>
         </div>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="you@example.com"
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white/90"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="••••••••"
-              required
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl pl-10 pr-11 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white/90"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
+
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">
               {error}
             </div>
           )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white rounded-lg py-3 font-semibold hover:bg-indigo-700 disabled:opacity-50 transition"
+            className="w-full bg-indigo-600 text-white rounded-xl py-3 font-semibold hover:bg-indigo-700 disabled:opacity-50 transition shadow-md hover:shadow-indigo-200"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
         <div className="mt-6 text-center space-y-2">
-          <p className="text-gray-500 text-sm">Don't have an account?</p>
+          <p className="text-gray-500 text-sm">Don&apos;t have an account?</p>
           <div className="flex gap-3 justify-center">
             <Link href="/register?role=patient"
               className="text-indigo-600 font-medium hover:underline text-sm">

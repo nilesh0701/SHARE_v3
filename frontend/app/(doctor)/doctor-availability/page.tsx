@@ -5,6 +5,7 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, LogOut, ChevronLeft } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -81,15 +82,18 @@ export default function AvailabilityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/doctor-dashboard" className="flex items-center gap-2 text-gray-600 hover:text-indigo-600">
             <ChevronLeft size={20} /> Dashboard
           </Link>
-          <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
-            <LogOut size={16} /> Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <button onClick={logout} className="flex items-center gap-1 text-red-500 text-sm">
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 

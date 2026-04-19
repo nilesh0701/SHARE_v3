@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import AuthBootstrap from "@/components/auth/auth-bootstrap";
+import ThemeProvider from "@/components/theme/theme-provider";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -16,9 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${geist.className} bg-gray-50 text-gray-900 min-h-screen`}>
-        <AuthBootstrap>{children}</AuthBootstrap>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geist.className} min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]`}>
+        <AuthBootstrap>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthBootstrap>
       </body>
     </html>
   );

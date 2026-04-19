@@ -5,6 +5,7 @@ import { getUser, logout } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search, MapPin, Video, Building2, User, LogOut, ChevronLeft, SlidersHorizontal } from "lucide-react";
+import ThemeToggle from "@/components/theme/theme-toggle";
 
 function SearchPageInner() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -54,7 +55,7 @@ function SearchPageInner() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#EEF4FF", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "var(--app-bg)", fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
         * { box-sizing: border-box; }
@@ -64,18 +65,23 @@ function SearchPageInner() {
       `}</style>
 
       {/* Nav */}
-      <nav className="bg-white sticky top-0 z-20" style={{ borderBottom: "1px solid #C7D9FF" }}>
+      <nav className="sticky top-0 z-20" style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/dashboard"
             className="flex items-center gap-2 font-semibold transition hover:opacity-70"
             style={{ color: "#3B6FE8", fontSize: 15, textDecoration: "none" }}>
             <ChevronLeft size={20} /> Back to Dashboard
           </Link>
-          <button onClick={logout}
-            className="flex items-center gap-1.5 font-semibold px-4 py-2 rounded-full"
-            style={{ background: "#FEF2F2", color: "#EF4444", fontSize: 14 }}>
-            <LogOut size={14} /> Logout
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <ThemeToggle size="sm" />
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 font-semibold px-4 py-2 rounded-full"
+              style={{ background: "var(--app-danger-surface)", color: "var(--app-danger)", fontSize: 14 }}
+            >
+              <LogOut size={14} /> Logout
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -83,10 +89,10 @@ function SearchPageInner() {
 
         {/* Heading */}
         <div>
-          <h1 className="font-black" style={{ color: "#1a1a2e", fontSize: 26 }}>
+          <h1 className="font-black" style={{ color: "var(--app-fg)", fontSize: 26 }}>
             {filters.specialty ? `${filters.specialty} Doctors` : "Find a Doctor"}
           </h1>
-          <p style={{ color: "#6b7280", fontSize: 15, marginTop: 4 }}>
+          <p style={{ color: "var(--app-muted)", fontSize: 15, marginTop: 4 }}>
             {doctors.length > 0
               ? `${doctors.length} verified doctor${doctors.length > 1 ? "s" : ""} found`
               : loading ? "Searching…" : "No results yet"}
@@ -94,12 +100,14 @@ function SearchPageInner() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm flex flex-wrap gap-3 items-end"
-          style={{ border: "1.5px solid #C7D9FF" }}>
+        <div
+          className="rounded-3xl p-5 shadow-sm flex flex-wrap gap-3 items-end"
+          style={{ background: "var(--app-surface)", border: "1.5px solid var(--app-border)" }}
+        >
           {/* Specialty */}
           <div className="flex-1 min-w-[160px]">
-            <label className="block font-semibold mb-1.5" style={{ color: "#374151", fontSize: 13 }}>Specialty</label>
-            <div className="flex items-center gap-2 rounded-2xl px-4 py-2.5" style={{ border: "2px solid #C7D9FF" }}>
+            <label className="block font-semibold mb-1.5" style={{ color: "var(--app-muted)", fontSize: 13 }}>Specialty</label>
+            <div className="flex items-center gap-2 rounded-2xl px-4 py-2.5" style={{ border: "2px solid var(--app-border)" }}>
               <Search size={15} style={{ color: "#9CA3AF" }} />
               <input
                 type="text"
@@ -108,19 +116,19 @@ function SearchPageInner() {
                 onChange={e => setFilters({ ...filters, specialty: e.target.value })}
                 onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent"
-                style={{ border: "none", color: "#1a1a2e", fontSize: 14 }}
+                style={{ border: "none", color: "var(--app-fg)", fontSize: 14 }}
               />
             </div>
           </div>
 
           {/* Type */}
           <div className="min-w-[150px]">
-            <label className="block font-semibold mb-1.5" style={{ color: "#374151", fontSize: 13 }}>Type</label>
+            <label className="block font-semibold mb-1.5" style={{ color: "var(--app-muted)", fontSize: 13 }}>Type</label>
             <select
               value={filters.consultation_type}
               onChange={e => setFilters({ ...filters, consultation_type: e.target.value })}
               className="w-full rounded-2xl px-4 py-2.5"
-              style={{ border: "2px solid #C7D9FF", color: "#1a1a2e", fontSize: 14 }}>
+              style={{ border: "2px solid var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)", fontSize: 14 }}>
               <option value="">All Types</option>
               <option value="VIDEO">Video</option>
               <option value="IN_PERSON">In Person</option>
@@ -129,12 +137,12 @@ function SearchPageInner() {
 
           {/* Gender */}
           <div className="min-w-[140px]">
-            <label className="block font-semibold mb-1.5" style={{ color: "#374151", fontSize: 13 }}>Gender</label>
+            <label className="block font-semibold mb-1.5" style={{ color: "var(--app-muted)", fontSize: 13 }}>Gender</label>
             <select
               value={filters.gender}
               onChange={e => setFilters({ ...filters, gender: e.target.value })}
               className="w-full rounded-2xl px-4 py-2.5"
-              style={{ border: "2px solid #C7D9FF", color: "#1a1a2e", fontSize: 14 }}>
+              style={{ border: "2px solid var(--app-border)", background: "var(--app-surface)", color: "var(--app-fg)", fontSize: 14 }}>
               <option value="">All</option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
@@ -159,15 +167,15 @@ function SearchPageInner() {
         ) : doctors.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">🔍</div>
-            <p className="font-bold" style={{ color: "#1a1a2e", fontSize: 18 }}>No doctors found</p>
-            <p style={{ color: "#6b7280", fontSize: 15, marginTop: 6 }}>Try different filters or specialty name</p>
+            <p className="font-bold" style={{ color: "var(--app-fg)", fontSize: 18 }}>No doctors found</p>
+            <p style={{ color: "var(--app-muted)", fontSize: 15, marginTop: 6 }}>Try different filters or specialty name</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {doctors.map((doc: any) => (
               <Link href={`/doctor/${doc.user_id}`} key={doc.user_id}
-                className="doctor-card bg-white rounded-3xl p-6 shadow-sm flex gap-4"
-                style={{ border: "1.5px solid #C7D9FF", textDecoration: "none" }}>
+                className="doctor-card rounded-3xl p-6 shadow-sm flex gap-4"
+                style={{ background: "var(--app-surface)", border: "1.5px solid var(--app-border)", textDecoration: "none" }}>
 
                 {/* Avatar */}
                 <div className="flex items-center justify-center rounded-2xl flex-shrink-0 font-black text-white"
@@ -176,14 +184,14 @@ function SearchPageInner() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold truncate" style={{ color: "#1a1a2e", fontSize: 17 }}>
+                  <p className="font-bold truncate" style={{ color: "var(--app-fg)", fontSize: 17 }}>
                     Dr. {doc.full_name}
                   </p>
                   <p className="font-semibold" style={{ color: "#3B6FE8", fontSize: 14, marginTop: 1 }}>
                     {doc.specialty}
                   </p>
                   {doc.bio && (
-                    <p className="line-clamp-2 mt-1" style={{ color: "#6b7280", fontSize: 13 }}>
+                    <p className="line-clamp-2 mt-1" style={{ color: "var(--app-muted)", fontSize: 13 }}>
                       {doc.bio}
                     </p>
                   )}
@@ -192,7 +200,7 @@ function SearchPageInner() {
                       ₹{doc.consultation_fee}
                     </span>
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
-                      style={{ background: "#EEF4FF", color: "#3B6FE8", border: "1px solid #C7D9FF" }}>
+                      style={{ background: "var(--app-surface-2)", color: "#3B6FE8", border: "1px solid var(--app-border)" }}>
                       {doc.consultation_type === "VIDEO"
                         ? <><Video size={11} /> Video</>
                         : doc.consultation_type === "IN_PERSON"
@@ -201,13 +209,13 @@ function SearchPageInner() {
                     </span>
                     {doc.gender && (
                       <span className="px-3 py-1 rounded-full text-xs font-semibold"
-                        style={{ background: "#F3F4F6", color: "#374151" }}>
+                        style={{ background: "var(--app-surface-2)", color: "var(--app-muted)" }}>
                         {doc.gender}
                       </span>
                     )}
                   </div>
                   {doc.clinic_address && (
-                    <div className="flex items-center gap-1 mt-2" style={{ color: "#9CA3AF" }}>
+                    <div className="flex items-center gap-1 mt-2" style={{ color: "var(--app-muted)" }}>
                       <MapPin size={12} />
                       <span style={{ fontSize: 12 }}>{doc.clinic_address}</span>
                     </div>
