@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     database_url: str
+    db_sslmode: str = "require"
     cloudinary_cloud_name: str
     cloudinary_api_key: str
     cloudinary_api_secret: str

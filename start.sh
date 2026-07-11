@@ -1,21 +1,27 @@
 #!/bin/bash
 
-# 1. Make the script executable (Run this once in terminal)
-# chmod +x /d/final/SHARE/SHARE_v2/start.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$SCRIPT_DIR/backend"
+FRONTEND_DIR="$SCRIPT_DIR/frontend"
+
+if [ -f "$BACKEND_DIR/venv/Scripts/activate" ]; then
+  VENV_ACTIVATE="source \"$BACKEND_DIR/venv/Scripts/activate\""
+elif [ -f "$BACKEND_DIR/venv/bin/activate" ]; then
+  VENV_ACTIVATE="source \"$BACKEND_DIR/venv/bin/activate\""
+else
+  echo "Virtual environment not found. Create one in backend/ first:"
+  echo "  cd backend && python -m venv venv"
+  exit 1
+fi
 
 echo "Starting SHARE..."
 
-# Start backend
-# Navigates to the backend folder, activates venv, and starts Uvicorn
-bash -c "cd /d/code/Projects/final/SHARE/SHARE_v2/backend && source venv/Scripts/activate && uvicorn app.main:app --reload --port 8000" &
+bash -c "cd \"$BACKEND_DIR\" && $VENV_ACTIVATE && uvicorn app.main:app --reload --port 8000" &
 BACKEND_PID=$!
 
-# Wait for backend to stabilize
 sleep 2
 
-# Start frontend
-# Navigates to the frontend folder and starts the dev server
-bash -c "cd /d/code/Projects/final/SHARE/SHARE_v2/frontend && npm run dev" &
+bash -c "cd \"$FRONTEND_DIR\" && npm run dev" &
 FRONTEND_PID=$!
 
 echo ""
@@ -26,6 +32,5 @@ echo "    API Docs: http://127.0.0.1:8000/docs"
 echo ""
 echo "Press Ctrl+C to stop everything"
 
-# Trap to kill both processes on exit
 trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" INT
 wait

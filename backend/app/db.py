@@ -5,7 +5,7 @@ from app.config import settings
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
-    connect_args={"sslmode": "require"}
+    connect_args={"sslmode": settings.db_sslmode}
 )
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
