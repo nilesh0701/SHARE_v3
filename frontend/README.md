@@ -1,8 +1,6 @@
 # SHARE frontend
 
-**[Full documentation → repository root README](../../../README.md)**
-
-Next.js 16 App Router UI. Local quick start from this directory:
+Next.js 16 App Router UI. Full documentation: [repository root README](../README.md).
 
 ```bash
 npm install
